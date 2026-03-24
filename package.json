@@ -1,0 +1,99 @@
+{
+  "name": "electron-pdf-workspace",
+  "version": "2.0.0",
+  "description": "PDF workspace built with Electron, React, MuPDF",
+  "type": "module",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k -n MAIN,VITE,APP -c blue,green,yellow \"npm run build:main -- --watch\" \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "npm run build:main && vite build",
+    "build:main": "node scripts/build-main.mjs",
+    "preview": "vite preview",
+    "start": "electron .",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "pack:mac": "npm run build && electron-builder --mac --dir",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "pack:win": "npm run build && electron-builder --win --dir",
+    "dist:win": "npm run build && electron-builder --win",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "concurrently": "^9.0.0",
+    "electron": "^41.0.3",
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.27.4",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0",
+    "vitest": "^4.1.1",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.electron.pdf-workspace",
+    "productName": "PDF Workspace",
+    "executableName": "PDFWorkspace",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "electronDist": "node_modules/electron/dist",
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "asar": true
+  },
+  "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^1.7.9",
+    "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.1.0",
+    "comlink": "^4.4.1",
+    "mupdf": "^1.27.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  }
+}
