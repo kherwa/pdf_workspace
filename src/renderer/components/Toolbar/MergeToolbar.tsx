@@ -9,7 +9,7 @@ import { PlusIcon, XIcon, FolderOpenIcon, FileIcon, ChevronDownIcon } from '../s
 
 export default function MergeToolbar() {
   const { state, dispatch } = useApp()
-  const { snackbar } = useDialog()
+  const { snackbar, prompt } = useDialog()
   const mupdf = useMupdf()
   const { openFilesForMerge } = useFileSystem()
   const [showMenu, setShowMenu] = useState(false)
@@ -41,6 +41,18 @@ export default function MergeToolbar() {
 
   async function handleMerge() {
     if (state.mergeSources.length < 2) { snackbar('Add at least 2 files to merge.', 'error'); return }
+
+    // Prompt for file name
+    const fileName = await prompt({
+      title: 'Save merged document as',
+      message: 'Enter a file name for the merged PDF:',
+      defaultValue: 'merged.pdf',
+      confirmLabel: 'Merge & Save',
+    })
+    if (!fileName) return // cancelled
+
+    const finalName = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`
+
     const sources = state.mergeSources.map(s => {
       const allPages = createPageOrder(s.numPages)
       return {
@@ -55,7 +67,7 @@ export default function MergeToolbar() {
     const tabId = mergeTab?.id ?? crypto.randomUUID()
 
     if (mergeTab) {
-      dispatch({ type: 'UPDATE_TAB', payload: { tabId, fileName: 'merged.pdf', isLoading: true } })
+      dispatch({ type: 'UPDATE_TAB', payload: { tabId, fileName: finalName, isLoading: true } })
     }
 
     try {
@@ -64,7 +76,7 @@ export default function MergeToolbar() {
         type: 'UPDATE_TAB',
         payload: {
           tabId, numPages,
-          fileName: 'merged.pdf',
+          fileName: finalName,
           pageOrder: createPageOrder(numPages),
           isLoading: false,
         },
@@ -77,6 +89,20 @@ export default function MergeToolbar() {
         dispatch({ type: 'REMOVE_MERGE_SOURCE', payload: { tabId: src.tabId } })
       }
       dispatch({ type: 'SET_MODE', payload: { mode: 'view' } })
+
+      // Automatically prompt Save As for merged document
+      try {
+        const target = await (window as any).showSaveFilePicker({
+          suggestedName: finalName,
+          types: [{ description: 'PDF Files', accept: { 'application/pdf': ['.pdf'] } }],
+        })
+        const writable = await target.createWritable()
+        await writable.write(bytes)
+        await writable.close()
+        dispatch({ type: 'UPDATE_TAB', payload: { tabId, fileHandle: target } })
+      } catch {
+        // User cancelled the save dialog — doc stays in memory only
+      }
     } catch (err) {
       console.error('Failed to open merged document:', err)
       snackbar(`Merge failed: ${err instanceof Error ? err.message : String(err)}`, 'error')

@@ -109,7 +109,7 @@ export function reducer(state: AppState, action: Action): AppState {
         tabs: state.tabs.map(t => {
           if (t.id !== tabId) return t
           const existing = t.annotations[page] ?? []
-          return { ...t, annotations: { ...t.annotations, [page]: [...existing, ann] } }
+          return { ...t, dirty: true, annotations: { ...t.annotations, [page]: [...existing, ann] } }
         }),
       }
     }
@@ -131,7 +131,7 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state,
         tabs: state.tabs.map(t =>
           t.id === action.payload.tabId
-            ? { ...t, pageOrder: action.payload.newOrder }
+            ? { ...t, dirty: true, pageOrder: action.payload.newOrder }
             : t
         ),
       }
@@ -144,7 +144,7 @@ export function reducer(state: AppState, action: Action): AppState {
           if (t.id !== tabId) return t
           const current = (t.rotations[page] ?? 0) as number
           const next = ((current + delta + 360) % 360) as 0 | 90 | 180 | 270
-          return { ...t, rotations: { ...t.rotations, [page]: next } }
+          return { ...t, dirty: true, rotations: { ...t.rotations, [page]: next } }
         }),
       }
     }
@@ -156,7 +156,7 @@ export function reducer(state: AppState, action: Action): AppState {
         tabs: state.tabs.map(t => {
           if (t.id !== tabId) return t
           const newOrder = t.pageOrder.filter(p => !pages.includes(p))
-          return { ...t, pageOrder: newOrder }
+          return { ...t, dirty: true, pageOrder: newOrder }
         }),
       }
     }
@@ -168,7 +168,7 @@ export function reducer(state: AppState, action: Action): AppState {
         tabs: state.tabs.map(t => {
           if (t.id !== tabId) return t
           const existing = t.redactions[page] ?? []
-          return { ...t, redactions: { ...t.redactions, [page]: [...existing, rect] } }
+          return { ...t, dirty: true, redactions: { ...t.redactions, [page]: [...existing, rect] } }
         }),
       }
     }
@@ -236,6 +236,32 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case 'SET_ORGANISE_PAGE':
       return { ...state, selectedOrganisePage: action.payload.page }
+
+    case 'SET_VIEW_LAYOUT':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.payload.tabId
+            ? { ...t, viewLayout: action.payload.layout }
+            : t
+        ),
+      }
+
+    case 'MARK_DIRTY':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.payload.tabId ? { ...t, dirty: true } : t
+        ),
+      }
+
+    case 'MARK_CLEAN':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.payload.tabId ? { ...t, dirty: false } : t
+        ),
+      }
 
     default:
       return state

@@ -2,6 +2,7 @@ import { useApp } from '../../context/AppContext'
 import { SaveIcon } from '../shared/Icons'
 
 const api = (window as any).electronAPI
+const isMac = api?.platform === 'darwin'
 
 export default function TopBar() {
   const { state, activeTab, dispatch } = useApp()
@@ -62,8 +63,8 @@ export default function TopBar() {
       <div className="flex items-center gap-1">
         {([
           { label: 'All Tools', active: false, onClick: handleAllToolsClick, disabled: false },
-          { label: 'Edit', active: isEditActive, onClick: handleEditClick, disabled: !activeTab },
-          { label: 'Convert', active: isConvertActive, onClick: handleConvertClick, disabled: !activeTab },
+          { label: 'Edit', active: !state.drawerCollapsed && isEditActive, onClick: handleEditClick, disabled: !activeTab },
+          { label: 'Convert', active: !state.drawerCollapsed && isConvertActive, onClick: handleConvertClick, disabled: !activeTab },
         ] as const).map(({ label, active, onClick, disabled }) => (
           <button
             key={label}
@@ -86,7 +87,7 @@ export default function TopBar() {
           className="btn-icon-xs"
           style={{ opacity: !activeTab ? 0.38 : 1 }}
           aria-label="Save"
-          title="Save (Ctrl+S)"
+          title={`Save (${isMac ? '⌘S' : 'Ctrl+S'})`}
         >
           <SaveIcon size={20} />
         </button>

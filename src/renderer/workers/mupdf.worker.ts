@@ -111,9 +111,26 @@ function pixmapToImageBitmap(pixmap: any): Promise<ImageBitmap> {
   return createImageBitmap(imageData)
 }
 
-/** Render a loaded page to ImageBitmap at the given scale. */
-function renderPagePixmap(page: any, scale: number): Promise<ImageBitmap> {
-  const matrix = mupdf.Matrix.scale(scale, scale)
+/** Render a loaded page to ImageBitmap at the given scale and optional rotation (degrees). */
+function renderPagePixmap(page: any, scale: number, rotation: number = 0): Promise<ImageBitmap> {
+  if (!rotation) {
+    // Fast path: no rotation
+    const matrix = mupdf.Matrix.scale(scale, scale)
+    const pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, true, true)
+    return pixmapToImageBitmap(pixmap)
+  }
+
+  // With rotation: scale first, then rotate, then shift to positive coords
+  const scaleM = mupdf.Matrix.scale(scale, scale)
+  const rotM = mupdf.Matrix.rotate(rotation)
+  let matrix = mupdf.Matrix.concat(scaleM, rotM)
+
+  // Find where the page bounds end up after the transform and shift to (0,0)
+  const bounds = page.getBounds() as [number, number, number, number]
+  const tb = mupdf.Rect.transform(bounds, matrix)
+  const shiftM = mupdf.Matrix.translate(-tb[0], -tb[1])
+  matrix = mupdf.Matrix.concat(matrix, shiftM)
+
   const pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, true, true)
   return pixmapToImageBitmap(pixmap)
 }
@@ -308,9 +325,9 @@ const api = {
 
   // ── Rendering ─────────────────────────────────────────────────────
 
-  renderPage: (tabId: string, pageNum: number, scale: number): Promise<ImageBitmap> =>
+  renderPage: (tabId: string, pageNum: number, scale: number, rotation: number = 0): Promise<ImageBitmap> =>
     withDoc(tabId, doc =>
-      withPage(doc, pageNum - 1, page => renderPagePixmap(page, scale)),
+      withPage(doc, pageNum - 1, page => renderPagePixmap(page, scale, rotation)),
     ),
 
   getThumbnail: (tabId: string, pageNum: number, dpr = 1): Promise<ImageBitmap> =>
@@ -415,8 +432,10 @@ const api = {
 
   convertToPdf: (buffer: ArrayBuffer, fileName: string): Promise<Uint8Array> =>
     withMupdf(() => {
+      // Pass the full filename as magic — MuPDF detects type from extension.
+      // Fall back to MIME map only for extensions that need it.
       const ext = fileName.split('.').pop()?.toLowerCase() ?? ''
-      const magic = MIME_MAP[ext] || ext
+      const magic = MIME_MAP[ext] || fileName
       const srcDoc = mupdf.Document.openDocument(buffer, magic)
 
       const outBuf = new mupdf.Buffer()

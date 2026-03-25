@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useApp } from '../context/AppContext'
+import { useDialog } from '../context/DialogContext'
 import { useMupdf } from './useMupdf'
 import { useRecentFiles } from './useRecentFiles'
 import { createPageOrder } from '../utils/array'
@@ -19,6 +20,8 @@ export function makeTab(overrides: Partial<Tab> & Pick<Tab, 'id' | 'fileName' | 
     activeTool: null,
     activeColor: '#f59e0b',
     isLoading: false,
+    viewLayout: 'single',
+    dirty: false,
     ...overrides,
   }
 }
@@ -46,6 +49,7 @@ async function loadDocument(
 
 export function useFileSystem() {
   const { state, dispatch } = useApp()
+  const { snackbar } = useDialog()
   const mupdf = useMupdf()
   const { addRecent } = useRecentFiles()
 
@@ -58,7 +62,10 @@ export function useFileSystem() {
     }
 
     const buffer: ArrayBuffer | null = await api.readFileBuffer(filePath)
-    if (!buffer) return
+    if (!buffer) {
+      snackbar(`Could not locate file: ${fileName}`, 'error')
+      return
+    }
 
     const tabId = crypto.randomUUID()
     dispatch({ type: 'OPEN_TAB', payload: makeTab({ id: tabId, fileName, numPages: 1, fileHandle: null, filePath, isLoading: true }) })

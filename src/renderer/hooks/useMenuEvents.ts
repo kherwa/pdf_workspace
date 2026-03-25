@@ -36,7 +36,7 @@ export function hasOrganiseChanges(tab: Tab): boolean {
 export function useMenuEvents() {
   const { openFiles, saveBytes } = useFileSystem()
   const { state, dispatch } = useApp()
-  const { snackbar } = useDialog()
+  const { snackbar, confirm } = useDialog()
   const mupdf = useMupdf()
 
   useEffect(() => {
@@ -61,6 +61,7 @@ export function useMenuEvents() {
         if (handle && !tab.fileHandle) {
           dispatch({ type: 'UPDATE_TAB', payload: { tabId: tab.id, fileHandle: handle } })
         }
+        dispatch({ type: 'MARK_CLEAN', payload: { tabId: tab.id } })
       } catch (err) {
         console.error('Save failed:', err)
         snackbar(`Save failed: ${err instanceof Error ? err.message : String(err)}`, 'error')
@@ -77,16 +78,27 @@ export function useMenuEvents() {
         if (handle) {
           dispatch({ type: 'UPDATE_TAB', payload: { tabId: tab.id, fileHandle: handle } })
         }
+        dispatch({ type: 'MARK_CLEAN', payload: { tabId: tab.id } })
       } catch (err) {
         console.error('Save As failed:', err)
         snackbar(`Save failed: ${err instanceof Error ? err.message : String(err)}`, 'error')
       }
     })
 
-    api.onMenuCloseTab(() => {
-      if (state.activeTabId) {
-        dispatch({ type: 'CLOSE_TAB', payload: { tabId: state.activeTabId } })
+    api.onMenuCloseTab(async () => {
+      if (!state.activeTabId) return
+      const tab = state.tabs.find(t => t.id === state.activeTabId)
+      if (tab?.dirty) {
+        const ok = await confirm({
+          title: 'Unsaved changes',
+          message: `"${tab.fileName}" has unsaved changes. Close without saving?`,
+          confirmLabel: 'Close without saving',
+          danger: true,
+        })
+        if (!ok) return
       }
+      mupdf.closeDocument(state.activeTabId)
+      dispatch({ type: 'CLOSE_TAB', payload: { tabId: state.activeTabId } })
     })
 
     return () => {

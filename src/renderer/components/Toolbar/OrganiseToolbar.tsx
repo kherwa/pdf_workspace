@@ -9,7 +9,7 @@ import { RotateCCWIcon, RotateCWIcon, TrashIcon, ScissorsIcon, FilePlusIcon, Fil
 
 export default function OrganiseToolbar() {
   const { state, activeTab, dispatch } = useApp()
-  const { snackbar, confirm } = useDialog()
+  const { snackbar, confirm, select } = useDialog()
   const mupdf = useMupdf()
   const { saveBytes } = useFileSystem()
   const { invalidate } = useThumbnails()
@@ -70,9 +70,32 @@ export default function OrganiseToolbar() {
     dispatch({ type: 'SET_ORGANISE_PAGE', payload: { page: null } })
   }
 
+  /** Ask for insert position — returns 0-based index into pageOrder, or null if cancelled */
+  async function askInsertPosition(): Promise<number | null> {
+    // Determine reference page: selected page if any, else last page
+    const refPage = hasSelection ? sel! : pageOrder[pageOrder.length - 1]
+    const refIndex = pageOrder.indexOf(refPage)
+
+    const choice = await select({
+      title: 'Insert position',
+      message: `Insert relative to page ${refPage}:`,
+      options: [
+        { label: `Before page ${refPage}`, value: 'before' },
+        { label: `After page ${refPage}`, value: 'after' },
+      ],
+    })
+
+    if (!choice) return null
+    return choice === 'before' ? refIndex : refIndex + 1
+  }
+
   async function handleInsertBlankPage() {
-    const insertAt = hasSelection ? pageOrder.indexOf(sel!) + 1 : pageOrder.length
-    await mupdf.insertBlankPage(tabId, insertAt)
+    const insertAt = await askInsertPosition()
+    if (insertAt === null) return
+
+    // Insert at the end of the actual document (MuPDF 0-based)
+    const docInsertAt = numPages
+    await mupdf.insertBlankPage(tabId, docInsertAt)
 
     const newPageNum = numPages + 1
     const newOrder = [...pageOrder]
@@ -84,6 +107,7 @@ export default function OrganiseToolbar() {
         tabId,
         numPages: numPages + 1,
         pageOrder: newOrder,
+        dirty: true,
       },
     })
     invalidate(tabId)
@@ -100,12 +124,15 @@ export default function OrganiseToolbar() {
       return
     }
 
+    const insertAt = await askInsertPosition()
+    if (insertAt === null) return
+
     const file = await handles[0].getFile()
     const buffer = await file.arrayBuffer()
 
-    const insertAt = hasSelection ? pageOrder.indexOf(sel!) + 1 : pageOrder.length
-
-    const { insertedCount } = await mupdf.insertPages(tabId, buffer, insertAt)
+    // Insert pages at the end of the actual document
+    const docInsertAt = numPages
+    const { insertedCount } = await mupdf.insertPages(tabId, buffer, docInsertAt)
 
     const newPageNumbers = Array.from({ length: insertedCount }, (_, i) => numPages + 1 + i)
     const newOrder = [...pageOrder]
@@ -117,6 +144,7 @@ export default function OrganiseToolbar() {
         tabId,
         numPages: numPages + insertedCount,
         pageOrder: newOrder,
+        dirty: true,
       },
     })
     invalidate(tabId)

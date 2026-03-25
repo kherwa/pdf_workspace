@@ -2,6 +2,7 @@ import type { Annotation, RedactionRect, ToolName } from './annotations'
 import type { CompressionSettings } from './compress'
 
 export type AppMode = 'view' | 'organise' | 'merge' | 'compress' | 'redact'
+export type ViewLayout = 'single' | 'two-page'
 export type DrawerView = 'home' | 'all' | 'edit' | 'convert'
 export type HomeSection = 'recent' | 'computer'
 export type ComputerFolder = 'desktop' | 'downloads' | 'documents' | null
@@ -22,6 +23,8 @@ export interface Tab {
   activeTool: ToolName | null
   activeColor: string
   isLoading: boolean
+  viewLayout: ViewLayout
+  dirty: boolean                   // true if any unsaved changes exist
 }
 
 export interface MergeSource {
@@ -73,3 +76,6 @@ export type Action =
   | { type: 'SET_HOME_SECTION';  payload: { section: HomeSection } }
   | { type: 'SET_COMPUTER_FOLDER'; payload: { folder: ComputerFolder } }
   | { type: 'SET_ORGANISE_PAGE';  payload: { page: number | null } }
+  | { type: 'SET_VIEW_LAYOUT';   payload: { tabId: string; layout: ViewLayout } }
+  | { type: 'MARK_DIRTY';        payload: { tabId: string } }
+  | { type: 'MARK_CLEAN';        payload: { tabId: string } }

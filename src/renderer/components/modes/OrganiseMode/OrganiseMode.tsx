@@ -77,8 +77,9 @@ export default function OrganiseMode() {
       className="h-full overflow-auto p-6"
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-        gap: 16,
+        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+        gap: 32,
+        padding: 32,
         backgroundColor: 'var(--md-surface-dim)',
       }}
     >

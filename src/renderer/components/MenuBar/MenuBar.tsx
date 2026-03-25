@@ -98,6 +98,19 @@ export default function MenuBar() {
 
   async function handleCloseTab(tabId: string, e: React.MouseEvent) {
     e.stopPropagation()
+
+    // Check for unsaved changes
+    const tab = state.tabs.find(t => t.id === tabId)
+    if (tab?.dirty) {
+      const ok = await confirm({
+        title: 'Unsaved changes',
+        message: `"${tab.fileName}" has unsaved changes. Close without saving?`,
+        confirmLabel: 'Close without saving',
+        danger: true,
+      })
+      if (!ok) return
+    }
+
     const isMergeSource = state.mergeSources.some(s => s.tabId === tabId)
     if (isMergeSource) {
       const ok = await confirm({
@@ -133,49 +146,53 @@ export default function MenuBar() {
         paddingRight: isLinux ? 8 : (isMac ? 8 : 140),
       } as React.CSSProperties}
     >
-      {/* Menu buttons */}
-      {MENUS.map((menu, idx) => (
-        <div key={menu.label} className="relative titlebar-no-drag">
-          <button
-            onClick={() => setOpenMenu(openMenu === idx ? null : idx)}
-            onMouseEnter={() => { if (openMenu !== null) setOpenMenu(idx) }}
-            className="btn-toggle"
-            style={{
-              color: openMenu === idx ? 'var(--md-on-surface)' : undefined,
-              backgroundColor: openMenu === idx ? 'var(--md-outline-08)' : undefined,
-            }}
-            aria-label={menu.label}
-          >
-            {idx === 0 && <MenuIcon size={18} />}
-            {menu.label}
-          </button>
+      {/* Menu buttons — hidden on macOS (native menu handles shortcuts) */}
+      {!isMac && (
+        <>
+          {MENUS.map((menu, idx) => (
+            <div key={menu.label} className="relative titlebar-no-drag">
+              <button
+                onClick={() => setOpenMenu(openMenu === idx ? null : idx)}
+                onMouseEnter={() => { if (openMenu !== null) setOpenMenu(idx) }}
+                className="btn-toggle"
+                style={{
+                  color: openMenu === idx ? 'var(--md-on-surface)' : undefined,
+                  backgroundColor: openMenu === idx ? 'var(--md-outline-08)' : undefined,
+                }}
+                aria-label={menu.label}
+              >
+                {idx === 0 && <MenuIcon size={18} />}
+                {menu.label}
+              </button>
 
-          {openMenu === idx && (
-            <div className="dropdown">
-              {menu.items.map((item, i) =>
-                item.separator ? (
-                  <div key={i} className="divider-h" />
-                ) : (
-                  <button
-                    key={i}
-                    onClick={() => { setOpenMenu(null); item.action?.() }}
-                    className="dropdown-item justify-between"
-                  >
-                    <span>{item.label}</span>
-                    {item.shortcut && (
-                      <span className="ml-6 text-label-medium text-on-surface-muted">
-                        {item.shortcut}
-                      </span>
-                    )}
-                  </button>
-                )
+              {openMenu === idx && (
+                <div className="dropdown">
+                  {menu.items.map((item, i) =>
+                    item.separator ? (
+                      <div key={i} className="divider-h" />
+                    ) : (
+                      <button
+                        key={i}
+                        onClick={() => { setOpenMenu(null); item.action?.() }}
+                        className="dropdown-item justify-between"
+                      >
+                        <span>{item.label}</span>
+                        {item.shortcut && (
+                          <span className="ml-6 text-label-medium text-on-surface-muted">
+                            {item.shortcut}
+                          </span>
+                        )}
+                      </button>
+                    )
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
-      ))}
+          ))}
 
-      <div className="divider-v" />
+          <div className="divider-v" />
+        </>
+      )}
 
       {/* Home button */}
       <button
@@ -186,6 +203,7 @@ export default function MenuBar() {
           dispatch({ type: 'SET_MODE', payload: { mode: 'view' } })
           dispatch({ type: 'SET_DRAWER_VIEW', payload: { view: 'home' } })
           dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: null } })
+          if (state.drawerCollapsed) dispatch({ type: 'TOGGLE_DRAWER' })
         }}
         className="btn-icon-xs titlebar-no-drag"
         style={{
