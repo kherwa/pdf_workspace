@@ -159,7 +159,7 @@ export default function ModeBar() {
       </div>
 
       {/* Divider */}
-      <div className="divider-h-inset" style={{ margin: '0 16px' }} />
+      <div className="divider-h-inset" />
 
       {/* Bottom section */}
       <div className="flex flex-col gap-1 p-2">

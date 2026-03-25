@@ -24,7 +24,7 @@ export default function App() {
   const isHome = drawerView === 'home'
 
   return (
-    <div className="flex flex-col h-full select-none" style={{ backgroundColor: 'var(--md-surface)' }}>
+    <div className="flex flex-col h-full select-none bg-surface">
       {/* Menu bar + drag region */}
       <MenuBar />
 
@@ -32,10 +32,7 @@ export default function App() {
       {activeTab && <TopBar />}
 
       {/* Body: navigation drawer + content */}
-      <div
-        className="flex flex-1 overflow-hidden"
-        style={!activeTab ? { borderTop: '1px solid var(--md-outline-30)' } : undefined}
-      >
+      <div className={`flex flex-1 overflow-hidden ${!activeTab ? 'border-top-outline' : ''}`}>
         {/* Navigation drawer */}
         <ModeBar />
 

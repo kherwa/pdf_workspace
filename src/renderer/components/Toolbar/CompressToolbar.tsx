@@ -1,6 +1,7 @@
 import { useApp } from '../../context/AppContext'
 import { useMupdf } from '../../hooks/useMupdf'
 import { useFileSystem } from '../../hooks/useFileSystem'
+import { appendSuffixToFileName } from '../../utils/file'
 
 export default function CompressToolbar() {
   const { state, activeTab, dispatch } = useApp()
@@ -11,7 +12,9 @@ export default function CompressToolbar() {
   async function handleCompress() {
     if (!activeTab) return
     const bytes = await mupdf.compressDocument(activeTab.id, compression)
-    await saveBytes(bytes, `compressed_${activeTab.fileName}`)
+    // Force Save As for compression outputs
+    const suggested = appendSuffixToFileName(activeTab.fileName, '_compressed')
+    await saveBytes(bytes, suggested, null, null)
   }
 
   return (
@@ -63,8 +66,8 @@ export default function CompressToolbar() {
         </>
       )}
 
-      <button onClick={handleCompress} disabled={!activeTab} className="btn-compact ml-auto">
-        Compress & Save
+      <button onClick={handleCompress} disabled={!activeTab} className="btn-save btn-compact ml-auto">
+        Compress
       </button>
     </div>
   )

@@ -138,14 +138,7 @@ export default function MenuBar() {
   }, [])
 
   return (
-    <div
-      ref={barRef}
-      className="titlebar"
-      style={{
-        paddingLeft: isMac ? 78 : 8,
-        paddingRight: isLinux ? 8 : (isMac ? 8 : 140),
-      } as React.CSSProperties}
-    >
+    <div ref={barRef} className={`titlebar ${isMac ? 'platform-mac' : isLinux ? 'platform-linux' : 'platform-win'}`}>
       {/* Menu buttons — hidden on macOS (native menu handles shortcuts) */}
       {!isMac && (
         <>
@@ -154,11 +147,7 @@ export default function MenuBar() {
               <button
                 onClick={() => setOpenMenu(openMenu === idx ? null : idx)}
                 onMouseEnter={() => { if (openMenu !== null) setOpenMenu(idx) }}
-                className="btn-toggle"
-                style={{
-                  color: openMenu === idx ? 'var(--md-on-surface)' : undefined,
-                  backgroundColor: openMenu === idx ? 'var(--md-outline-08)' : undefined,
-                }}
+                className={`btn-toggle ${openMenu === idx ? 'menu-active' : ''}`}
                 aria-label={menu.label}
               >
                 {idx === 0 && <MenuIcon size={18} />}
@@ -205,11 +194,7 @@ export default function MenuBar() {
           dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: null } })
           if (state.drawerCollapsed) dispatch({ type: 'TOGGLE_DRAWER' })
         }}
-        className="btn-icon-xs titlebar-no-drag"
-        style={{
-          color: state.drawerView === 'home' && !activeTab ? 'var(--md-primary-40)' : undefined,
-          backgroundColor: state.drawerView === 'home' && !activeTab ? 'var(--md-primary-12)' : undefined,
-        }}
+        className={`btn-icon-xs titlebar-no-drag ${state.drawerView === 'home' && !activeTab ? 'home-active' : ''}`}
         aria-label="Home"
         title="Home"
       >
@@ -249,8 +234,7 @@ export default function MenuBar() {
               <span
                 role="button"
                 onClick={e => handleCloseTab(tab.id, e)}
-                className="shrink-0 w-6 h-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ backgroundColor: 'var(--md-outline-08)' }}
+                className="shrink-0 w-6 h-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity tab-close-bg"
                 aria-label={`Close ${tab.fileName}`}
               >
                 <XIcon size={14} />

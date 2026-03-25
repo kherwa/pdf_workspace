@@ -8,22 +8,21 @@ export default function ViewMode() {
   if (!activeTab) return null
   if (activeTab.isLoading) return <Loading message="Loading PDF..." />
 
+  const isTwoPage = activeTab.viewLayout === 'two-page'
+
   return (
-    <div
-      className="relative flex-1 h-full overflow-auto flex justify-center items-start p-6"
-      style={{ backgroundColor: 'var(--md-surface-dim)' }}
-    >
-      <div
-        className="relative inline-block"
-        style={{
-          borderRadius: 'var(--md-radius-md)',
-          overflow: 'hidden',
-          boxShadow: 'var(--md-elevation-2)',
-        }}
-      >
-        <PdfViewer />
-        {activeTab.editMode && <AnnotationLayer />}
-      </div>
+    <div className="relative flex-1 h-full overflow-auto flex justify-center items-start p-6 bg-surface-dim">
+      {isTwoPage ? (
+        <>
+          <PdfViewer />
+          {activeTab.editMode && <AnnotationLayer />}
+        </>
+      ) : (
+        <div className="relative inline-block redact-frame">
+          <PdfViewer />
+          {activeTab.editMode && <AnnotationLayer />}
+        </div>
+      )}
     </div>
   )
 }

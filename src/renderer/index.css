@@ -578,6 +578,43 @@
   .btn-compact:hover { background-color: var(--md-primary-08); }
   .btn-compact:disabled { opacity: 0.38; }
 
+  /* Unified Save button modifier: applied by SaveButton component */
+  .btn-save {
+    /* defaults delegate to the chosen size variant (filled/compact/icon) */
+  }
+  /* Filled save (uses existing filled styles) */
+  .btn-save.btn-filled {
+    background-color: var(--md-primary-40);
+    color: var(--md-on-primary);
+    box-shadow: var(--md-elevation-2);
+  }
+  .btn-save.btn-filled:hover { box-shadow: var(--md-elevation-4); }
+
+  /* Compact save: make compact save visually prominent (filled compact) */
+  .btn-save.btn-compact {
+    background-color: var(--md-primary-40);
+    color: var(--md-on-primary);
+    border-color: transparent;
+    box-shadow: var(--md-elevation-1);
+  }
+  .btn-save.btn-compact:hover { box-shadow: var(--md-elevation-3); }
+
+  /* Icon save: small circular filled button */
+  .btn-save.btn-icon-xs {
+    background-color: var(--md-primary-40);
+    color: var(--md-on-primary);
+    border-radius: 50%;
+    width: var(--md-btn-h);
+    height: var(--md-btn-h);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--md-elevation-1);
+  }
+  .btn-save.btn-icon-xs:hover { box-shadow: var(--md-elevation-3); }
+
+  .btn-save:disabled { opacity: 0.5; box-shadow: none; }
+
   /* Toggle variant: transparent border when inactive, primary when active */
   .btn-toggle {
     display: inline-flex;
@@ -648,6 +685,93 @@
     border: 1px solid var(--md-outline-20);
     border-radius: var(--md-radius-md);
   }
+  /* Dropdown variants */
+  .dropdown-left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 8px;
+    z-index: 50;
+  }
+  .dropdown-item.active { color: var(--md-primary-40); }
+
+  /* Menu / titlebar helpers */
+  .platform-mac { padding-left: 78px; padding-right: 8px; }
+  .platform-linux { padding-left: 8px; padding-right: 8px; }
+  .platform-win { padding-left: 8px; padding-right: 140px; }
+  .menu-active { color: var(--md-on-surface); background-color: var(--md-outline-08); }
+  .home-active { color: var(--md-primary-40); background-color: var(--md-primary-12); }
+  .tab-close-bg { background-color: var(--md-outline-08); }
+
+  /* File panel / Merge mode */
+  .file-panel { border-radius: var(--md-radius-md); box-shadow: var(--md-elevation-1); position: relative; }
+  .file-panel.dragging { opacity: 0.4; }
+  .file-panel-header { background-color: var(--md-surface-bright); border-bottom: 1px solid var(--md-outline-20); }
+  .thumb-card { width: 130px; height: 180px; border-radius: var(--md-radius-sm); overflow: hidden; padding: 4px; }
+  .thumb-selected { outline: 2px solid var(--md-error-40); outline-offset: 2px; background-color: var(--md-error-08); }
+  .thumb-canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .thumb-canvas.hidden { display: none; }
+  .selected-badge { background-color: var(--md-error-40); color: var(--md-on-error); font-size: 10px; font-weight: 700; }
+  .drop-indicator { position: absolute; left: 0; right: 0; height: 3px; border-radius: 2px; background-color: var(--md-primary-40); z-index: 10; }
+  .drop-indicator.top { top: -4px; }
+  .drop-indicator.bottom { bottom: -4px; }
+  /* Vertical drop indicators for page thumbnails */
+  .drop-indicator-vert-left { position: absolute; left: -4px; top: 0; bottom: 0; width: 3px; border-radius: 2px; background-color: var(--md-primary-40); }
+  .drop-indicator-vert-right { position: absolute; right: -4px; top: 0; bottom: 0; width: 3px; border-radius: 2px; background-color: var(--md-primary-40); }
+
+  .thumb-card-rotate { border-radius: var(--md-radius-md); overflow: hidden; }
+  .thumb-card-rotate.selected-outline { outline: 2px solid var(--md-primary-40); outline-offset: 2px; }
+  .thumb-card-rotate { border-radius: var(--md-radius-md); overflow: hidden; display:flex; align-items:center; justify-content:center; }
+  .thumb-card-rotate.selected-outline { outline: 2px solid var(--md-primary-40); outline-offset: 2px; }
+  /* Rotate the inner canvas so the layout box (aspect ratio) remains stable */
+  .thumb-card-rotate canvas { transform-origin: center center; transition: transform 0.15s ease; max-width: 100%; max-height: 100%; display: block; }
+  .thumb-card-rotate.rot-0 canvas { transform: rotate(0deg); }
+  .thumb-card-rotate.rot-90 canvas { transform: rotate(90deg); }
+  .thumb-card-rotate.rot-180 canvas { transform: rotate(180deg); }
+  .thumb-card-rotate.rot-270 canvas { transform: rotate(270deg); }
+  .dropdown-below { top: 100%; margin-top: 4px; }
+  .cursor-crosshair { cursor: crosshair; }
+  .organise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 32px;
+    padding: 32px;
+    background-color: var(--md-surface-dim);
+  }
+  .redact-bg { background-color: var(--md-surface-dim); }
+  .redact-frame { border-radius: var(--md-radius-md); overflow: hidden; box-shadow: var(--md-elevation-2); }
+  .btn-icon-28 { width: 28px; height: 28px; }
+  .filepanel-pages-bg { background-color: var(--md-surface-dim); }
+  .panel-card { background-color: var(--md-surface-container); border-radius: var(--md-radius-md); box-shadow: var(--md-elevation-1); }
+  .constrain-md { max-width: 640px; margin: 0 auto; }
+  .btn-text-sm { height: 36px; padding: 0 12px; color: var(--md-on-surface-variant); }
+  .btn-open-file { height: 40px; padding: 0 24px; }
+  .rendering-overlay { background-color: rgba(0,0,0,0.15); backdrop-filter: blur(1px); border-radius: inherit; z-index: 10; transition: opacity 0.15s ease; }
+  .rendering-panel { background-color: var(--md-surface-container-high, #2b2b2b); border-radius: var(--md-radius-lg, 16px); box-shadow: var(--md-elevation-2); }
+  .spinner-md { width: 32px; height: 32px; animation: md3-spin 1.4s linear infinite; }
+  .spinner-md circle { animation: md3-dash 1.4s ease-in-out infinite; }
+  .annotation-layer-container { position: absolute; inset: 0; z-index: 10; }
+  .annotation-svg { cursor: default; }
+  .no-select { user-select: none; }
+  .annotation-textarea {
+    position: absolute; padding: 4px; font-size: 14px; line-height: 1.3; background-color: rgba(255,255,255,0.9);
+    border-radius: 2px; outline: none; resize: none; overflow: hidden; z-index: 20; font-family: var(--md-font-family);
+  }
+  .disabled-opacity { opacity: 0.38; }
+  .tool-active { background-color: var(--md-secondary-container); color: var(--md-secondary-40); border-color: var(--md-secondary-40); }
+  .border-error { border-color: var(--md-error-40); }
+
+  /* Status bar */
+  .statusbar-aside { width: 64px; background-color: var(--md-surface); border-left: 1px solid var(--md-outline-20); }
+  .status-input { width: 44px; height: 32px; background-color: var(--md-surface-container); border: 1px solid var(--md-outline-30); color: var(--md-on-surface); font-size: 12px; }
+  .status-input.focused { border-color: var(--md-primary-40); }
+  .text-xs-muted { font-size: 10px; color: var(--md-on-surface-muted); line-height: 1; }
+  .status-divider { width: 24px; height: 1px; background-color: var(--md-outline-20); }
+  .border-top-outline { border-top: 1px solid var(--md-outline-30); }
+  /* Dialog helpers */
+  .dialog-section-padding { padding: 0 24px 16px; }
+  .dialog-input { padding: 8px 12px; background-color: var(--md-surface-container); border: 1px solid var(--md-outline-30); color: var(--md-on-surface); font-size: 14px; }
+  .dialog-item-rounded { border-radius: 8px; }
   .dropdown-item {
     display: flex;
     align-items: center;
@@ -788,6 +912,10 @@
     animation: md3-spin 0.6s linear infinite;
   }
 
+  /* Larger spinner variant used by Loading component */
+  .spinner-lg { width: 48px; height: 48px; animation: md3-spin 1.4s linear infinite; }
+  .spinner-lg circle { animation: md3-dash 1.4s ease-in-out infinite; }
+
   /* ── Inputs: accent color ─────────────────────────────────────────────── */
   .accent-primary { accent-color: var(--md-primary-40); }
 
@@ -824,13 +952,12 @@
   /* Rotatable variant — uses --rotation CSS var for combined rotate+lift */
   .thumb-card-rotate {
     box-shadow: var(--md-elevation-1);
-    transform: rotate(var(--rotation, 0deg));
     transition: box-shadow var(--md-duration-short) var(--md-easing-standard),
                 transform var(--md-duration-short) var(--md-easing-standard);
   }
   .thumb-card-rotate:hover {
     box-shadow: var(--md-elevation-3);
-    transform: rotate(var(--rotation, 0deg)) translateY(-2px);
+    transform: translateY(-2px);
   }
 
   /* ── Dashed "add" button ────────────────────────────────────────────── */

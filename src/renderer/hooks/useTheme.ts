@@ -41,6 +41,22 @@ export function useTheme() {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
+  // Listen for system theme events from main process (Electron nativeTheme updates)
+  useEffect(() => {
+    const handler = (t: string) => {
+      // Always follow system updates regardless of stored preference (user requested auto-follow)
+      setTheme(t === 'dark' ? 'dark' : 'light')
+    }
+    try {
+      api?.onSystemTheme?.(handler)
+    } catch {
+      /* ignore if not available */
+    }
+    return () => {
+      try { api?.removeAllListeners?.('theme:system') } catch {}
+    }
+  }, [])
+
   function toggle() {
     setTheme(t => (t === 'dark' ? 'light' : 'dark'))
   }

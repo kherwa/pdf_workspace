@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   triggerMenuSaveAs:   () => ipcRenderer.emit('menu:saveAs'),
   triggerMenuCloseTab: () => ipcRenderer.emit('menu:closeTab'),
   setTheme:            (theme: string) => ipcRenderer.send('theme:changed', theme),
+  onSystemTheme:       (cb: (theme: string) => void) => ipcRenderer.on('theme:system', (_e, theme: string) => cb(theme)),
   getQuickPaths:       () => ipcRenderer.invoke('fs:getQuickPaths'),
   listPDFs:            (dirPath: string) => ipcRenderer.invoke('fs:listPDFs', dirPath),
   readFileBuffer:      (filePath: string) => ipcRenderer.invoke('fs:readFileBuffer', filePath),

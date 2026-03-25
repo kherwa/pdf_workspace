@@ -25,9 +25,12 @@ export default function RedactToolbar() {
     })
     if (!ok) return
     try {
-      const bytes = await mupdf.applyRedactions(activeTab.id, activeTab.redactions, activeTab.scale)
-      await saveBytes(bytes, activeTab.fileName, activeTab.fileHandle, activeTab.filePath)
+      // Apply redactions in the worker (modifies the in-memory document). Do NOT auto-save to disk.
+      await mupdf.applyRedactions(activeTab.id, activeTab.redactions, activeTab.scale)
+      // Mark document dirty and clear staged redactions; user saves via File → Save / Save As
       dispatch({ type: 'CLEAR_REDACTIONS', payload: { tabId: activeTab.id } })
+      dispatch({ type: 'MARK_DIRTY', payload: { tabId: activeTab.id } })
+      snackbar('Redactions applied (unsaved). Use File → Save to save changes.', 'success')
     } catch (err) {
       console.error('Apply redactions failed:', err)
       snackbar(`Redaction failed: ${err instanceof Error ? err.message : String(err)}`, 'error')
@@ -36,7 +39,7 @@ export default function RedactToolbar() {
 
   return (
     <div className="toolbar">
-      <span className="text-body-small text-on-surface-muted" style={{ marginRight: 8 }}>
+      <span className="text-body-small text-on-surface-muted mr-2">
         Draw rectangles over content to redact
       </span>
 
@@ -60,11 +63,7 @@ export default function RedactToolbar() {
       <button
         onClick={applyRedactions}
         disabled={!totalRedactions}
-        className="btn-compact ml-auto"
-        style={{
-          color: totalRedactions ? 'var(--md-error-40)' : undefined,
-          borderColor: totalRedactions ? 'var(--md-error-40)' : undefined,
-        }}
+        className={`btn-compact ml-auto ${totalRedactions ? 'text-error border-error' : ''}`}
       >
         <ShieldIcon size={18} />
         Apply Redactions

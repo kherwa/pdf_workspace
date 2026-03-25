@@ -31,27 +31,15 @@ function RecentFilesView() {
   }
 
   return (
-    <div
-      className="flex-1 h-full overflow-auto p-8"
-      style={{ backgroundColor: 'var(--md-surface-dim)' }}
-    >
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+    <div className="flex-1 h-full overflow-auto p-8 bg-surface-dim">
+      <div className="constrain-md">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <ClockIcon size={24} />
-            <h2
-              className="text-title-medium"
-              style={{ color: 'var(--md-on-surface)' }}
-            >
-              Recent Files
-            </h2>
+            <h2 className="text-title-medium text-on-surface">Recent Files</h2>
           </div>
           {files.length > 0 && (
-            <button
-              onClick={clearRecent}
-              className="btn-text"
-              style={{ height: 36, padding: '0 12px', color: 'var(--md-on-surface-variant)' }}
-            >
+            <button onClick={clearRecent} className="btn-text btn-text-sm">
               <TrashIcon size={16} />
               Clear
             </button>
@@ -59,17 +47,10 @@ function RecentFilesView() {
         </div>
 
         {files.length === 0 ? (
-          <div
-            className="flex flex-col items-center justify-center gap-4 py-16"
-            style={{ color: 'var(--md-on-surface-muted)' }}
-          >
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-on-surface-muted">
             <FileTextIcon size={48} />
             <p className="text-body-large">No recent files</p>
-            <button
-              onClick={() => openFiles(false)}
-              className="btn-filled"
-              style={{ height: 40, padding: '0 24px' }}
-            >
+            <button onClick={() => openFiles(false)} className="btn-filled btn-open-file">
               <FolderOpenIcon size={18} />
               Open a File
             </button>
@@ -80,17 +61,12 @@ function RecentFilesView() {
               <button
                 key={`${file.name}-${i}`}
                 onClick={() => handleFileClick(file)}
-                className="flex items-center gap-4 rounded-lg transition-colors text-left menu-item"
-                style={{
-                  height: 56,
-                  padding: '0 16px',
-                  color: 'var(--md-on-surface)',
-                }}
+                className="flex items-center gap-4 rounded-lg transition-colors text-left menu-item h-14 px-4 text-on-surface"
               >
                 <FileTextIcon size={20} />
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="text-body-medium truncate">{file.name}</span>
-                  <span className="text-label-small" style={{ color: 'var(--md-on-surface-muted)' }}>
+                  <span className="text-label-small text-on-surface-muted">
                     {new Date(file.openedAt).toLocaleDateString(undefined, {
                       month: 'short', day: 'numeric', year: 'numeric',
                       hour: '2-digit', minute: '2-digit',
@@ -183,47 +159,29 @@ function ComputerView() {
     : 'Select a folder'
 
   return (
-    <div
-      className="flex-1 h-full overflow-auto p-8"
-      style={{ backgroundColor: 'var(--md-surface-dim)' }}
-    >
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+    <div className="flex-1 h-full overflow-auto p-8 bg-surface-dim">
+      <div className="constrain-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <FolderOpenIcon size={24} />
-            <h2 className="text-title-medium" style={{ color: 'var(--md-on-surface)' }}>
-              {folderLabel}
-            </h2>
+            <h2 className="text-title-medium text-on-surface">{folderLabel}</h2>
           </div>
-          {folderPath && (
-            <span className="text-label-small" style={{ color: 'var(--md-on-surface-muted)' }}>
-              {folderPath}
-            </span>
-          )}
+          {folderPath && <span className="text-label-small text-on-surface-muted">{folderPath}</span>}
         </div>
 
         {/* Content */}
         {loading ? (
-          <div
-            className="flex items-center justify-center py-16"
-            style={{ color: 'var(--md-on-surface-muted)' }}
-          >
+          <div className="flex items-center justify-center py-16 text-on-surface-muted">
             <span className="text-body-medium">Loading...</span>
           </div>
         ) : !computerFolder ? (
-          <div
-            className="flex flex-col items-center justify-center gap-4 py-16"
-            style={{ color: 'var(--md-on-surface-muted)' }}
-          >
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-on-surface-muted">
             <FolderOpenIcon size={48} />
             <p className="text-body-large">Select a folder from the sidebar</p>
           </div>
         ) : files.length === 0 ? (
-          <div
-            className="flex flex-col items-center justify-center gap-4 py-16"
-            style={{ color: 'var(--md-on-surface-muted)' }}
-          >
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-on-surface-muted">
             <FileTextIcon size={48} />
             <p className="text-body-large">No PDF files in this folder</p>
           </div>
@@ -233,17 +191,12 @@ function ComputerView() {
               <button
                 key={file.path}
                 onClick={() => openFileByPath(file)}
-                className="flex items-center gap-4 rounded-lg transition-colors text-left menu-item"
-                style={{
-                  height: 56,
-                  padding: '0 16px',
-                  color: 'var(--md-on-surface)',
-                }}
+                className="flex items-center gap-4 rounded-lg transition-colors text-left menu-item h-14 px-4 text-on-surface"
               >
                 <FileTextIcon size={20} />
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="text-body-medium truncate">{file.name}</span>
-                  <span className="text-label-small" style={{ color: 'var(--md-on-surface-muted)' }}>
+                  <span className="text-label-small text-on-surface-muted">
                     {formatSize(file.size)} · {new Date(file.modified).toLocaleDateString(undefined, {
                       month: 'short', day: 'numeric', year: 'numeric',
                     })}

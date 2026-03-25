@@ -10,18 +10,8 @@ export default function RedactMode() {
 
   return (
     <div className="flex h-full overflow-hidden">
-      <div
-        className="flex-1 overflow-auto flex justify-center items-start p-6"
-        style={{ backgroundColor: 'var(--md-surface-dim)' }}
-      >
-        <div
-          className="relative inline-block"
-          style={{
-            borderRadius: 'var(--md-radius-md)',
-            overflow: 'hidden',
-            boxShadow: 'var(--md-elevation-2)',
-          }}
-        >
+      <div className="flex-1 overflow-auto flex justify-center items-start p-6 redact-bg">
+        <div className="relative inline-block redact-frame">
           <PdfViewer />
           <RedactLayer />
         </div>

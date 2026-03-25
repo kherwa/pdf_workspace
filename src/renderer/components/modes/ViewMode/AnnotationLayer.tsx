@@ -43,15 +43,15 @@ function AnnotationShape({ ann, selected, onSelect }: {
 
   switch (ann.type) {
     case 'highlight':
-      return <g onClick={handleClick} style={{ cursor: 'pointer' }}>
+      return <g onClick={handleClick} className="cursor-pointer">
         {outline}
         <rect x={ann.x} y={ann.y} width={ann.width} height={ann.height}
           fill={ann.color} opacity={ann.opacity} />
       </g>
     case 'text':
-      return <g onClick={handleClick} style={{ cursor: 'pointer' }}>
+      return <g onClick={handleClick} className="cursor-pointer">
         <text x={ann.x} y={ann.y + ann.fontSize} fontSize={ann.fontSize}
-          fill={ann.color} style={{ userSelect: 'none' }}>{ann.text}</text>
+          fill={ann.color} className="no-select">{ann.text}</text>
         {selected && <rect x={ann.x - 2} y={ann.y - 2} width={104} height={ann.fontSize + 8}
           fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" rx={2} ry={2} />}
       </g>
@@ -61,7 +61,7 @@ function AnnotationShape({ ann, selected, onSelect }: {
       for (let i = 2; i < ann.points.length; i += 2) {
         d += ` L ${ann.points[i]} ${ann.points[i + 1]}`
       }
-      return <g onClick={handleClick} style={{ cursor: 'pointer' }}>
+      return <g onClick={handleClick} className="cursor-pointer">
         <path d={d} stroke={ann.color} strokeWidth={ann.lineWidth}
           fill="none" strokeLinecap="round" strokeLinejoin="round" />
         {/* Wider invisible hit area */}
@@ -69,14 +69,14 @@ function AnnotationShape({ ann, selected, onSelect }: {
       </g>
     }
     case 'rect':
-      return <g onClick={handleClick} style={{ cursor: 'pointer' }}>
+      return <g onClick={handleClick} className="cursor-pointer">
         {selected && <rect x={ann.x - 3} y={ann.y - 3} width={ann.width + 6} height={ann.height + 6}
           fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" rx={2} ry={2} />}
         <rect x={ann.x} y={ann.y} width={ann.width} height={ann.height}
           stroke={ann.color} strokeWidth={ann.lineWidth} fill="transparent" />
       </g>
     case 'ellipse':
-      return <g onClick={handleClick} style={{ cursor: 'pointer' }}>
+      return <g onClick={handleClick} className="cursor-pointer">
         {selected && <ellipse cx={ann.x} cy={ann.y} rx={ann.radiusX + 3} ry={ann.radiusY + 3}
           fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" />}
         <ellipse cx={ann.x} cy={ann.y} rx={ann.radiusX} ry={ann.radiusY}
@@ -87,8 +87,7 @@ function AnnotationShape({ ann, selected, onSelect }: {
         <rect x={ann.x} y={ann.y} width={ann.width} height={ann.height} fill="white" />
         <text x={ann.x} y={ann.y + ann.fontSize} fontSize={ann.fontSize}
           fontFamily={ann.fontFamily} fontStyle={ann.fontStyle}
-          fontWeight={ann.fontWeight} fill="black"
-          style={{ userSelect: 'none' }}>{ann.newText}</text>
+          fontWeight={ann.fontWeight} fill="black" className="no-select">{ann.newText}</text>
       </>
     default:
       return null
@@ -241,7 +240,7 @@ export default function AnnotationLayer() {
   const hasTool = !!activeTab?.activeTool
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
+    <div className="annotation-layer-container">
       <svg
         ref={svgRef}
         width={dims.width}
@@ -249,7 +248,7 @@ export default function AnnotationLayer() {
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
-        style={{ cursor: hasTool ? 'crosshair' : 'default' }}
+        className={hasTool ? 'annotation-svg cursor-crosshair' : 'annotation-svg cursor-default'}
       >
         {pageAnnotations.map(ann => (
           <AnnotationShape
@@ -265,18 +264,8 @@ export default function AnnotationLayer() {
       {textInput && (
         <textarea
           ref={textInputRef}
-          style={{
-            position: 'absolute',
-            left: textInput.x, top: textInput.y,
-            width: textInput.width, height: textInput.height,
-            padding: '4px', fontSize: 14, lineHeight: 1.3,
-            color: activeTab?.activeColor ?? '#f59e0b',
-            backgroundColor: 'rgba(255,255,255,0.9)',
-            border: `2px dashed ${activeTab?.activeColor ?? '#f59e0b'}`,
-            borderRadius: 2, outline: 'none', resize: 'none',
-            overflow: 'hidden', zIndex: 20,
-            fontFamily: 'var(--md-font-family)',
-          }}
+          className="annotation-textarea"
+          style={{ left: textInput.x, top: textInput.y, width: textInput.width, height: textInput.height, color: activeTab?.activeColor ?? '#f59e0b', border: `2px dashed ${activeTab?.activeColor ?? '#f59e0b'}` }}
           placeholder="Type text..."
           onKeyDown={e => {
             if (e.key === 'Enter' && !e.shiftKey) {

@@ -220,6 +220,17 @@ export function FitWidthIcon({ size = 24, className }: IconProps) {
   )
 }
 
+export function FitHeightIcon({ size = 24, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M21 3H3v18h18V3z" />
+      <path d="M12 3v18" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M8 17l4 4 4-4" />
+    </svg>
+  )
+}
+
 export function TwoPageIcon({ size = 24, className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

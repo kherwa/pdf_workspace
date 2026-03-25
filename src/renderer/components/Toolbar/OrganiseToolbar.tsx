@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { useDialog } from '../../context/DialogContext'
 import { useMupdf } from '../../hooks/useMupdf'
 import { useFileSystem } from '../../hooks/useFileSystem'
+import { appendSuffixToFileName } from '../../utils/file'
 import { useThumbnails } from '../../hooks/useThumbnails'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { RotateCCWIcon, RotateCWIcon, TrashIcon, ScissorsIcon, FilePlusIcon, FileBlankIcon, ChevronDownIcon } from '../shared/Icons'
@@ -47,7 +48,9 @@ export default function OrganiseToolbar() {
     const pages = parseRange(rangeInput)
     if (!pages.length) { snackbar('No valid pages in range.', 'error'); return }
     const bytes = await mupdf.extractPages(tabId, pages)
-    await saveBytes(bytes, `extracted_${fileName}`)
+    // Force Save As for exports (append suffix before extension)
+    const suggested = appendSuffixToFileName(fileName, '_extracted')
+    await saveBytes(bytes, suggested, null, null)
     setShowRange(false)
     setRangeInput('')
   }
@@ -152,7 +155,7 @@ export default function OrganiseToolbar() {
 
   return (
     <div className="toolbar flex-wrap">
-      <span className="text-body-small text-on-surface-muted" style={{ marginRight: 8 }}>
+      <span className="text-body-small text-on-surface-muted mr-2">
         Drag to reorder, click to select
       </span>
 
@@ -212,8 +215,7 @@ export default function OrganiseToolbar() {
       <button
         onClick={handleDelete}
         disabled={!hasSelection}
-        className="btn-icon-xs"
-        style={{ color: hasSelection ? 'var(--md-error-40)' : undefined }}
+        className={`btn-icon-xs ${hasSelection ? 'text-error' : ''}`}
         title="Delete page"
         aria-label="Delete page"
       >
@@ -239,7 +241,7 @@ export default function OrganiseToolbar() {
             onChange={e => setRangeInput(e.target.value)}
             className="input-sm w-36"
           />
-          <button onClick={handleExtractRange} className="btn-compact">
+          <button onClick={handleExtractRange} className="btn-save btn-compact">
             Extract
           </button>
         </>

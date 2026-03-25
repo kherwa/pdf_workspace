@@ -53,29 +53,19 @@ export default function PageThumbnail({ page, tabId, bitmap, rotation, selected,
   return (
     <div
       ref={ref}
-      style={{ opacity: isDragging ? 0.4 : 1, position: 'relative' }}
-      className="group flex flex-col items-center gap-2 cursor-grab active:cursor-grabbing"
+      className={`group flex flex-col items-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-40' : ''}`}
       onClick={onSelect}
     >
       {/* Drop indicator — left edge */}
       {closestEdge === 'left' && (
-        <div style={{ position: 'absolute', left: -4, top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: 'var(--md-primary-40)' }} />
+        <div className="drop-indicator-vert-left" />
       )}
       {/* Drop indicator — right edge */}
       {closestEdge === 'right' && (
-        <div style={{ position: 'absolute', right: -4, top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: 'var(--md-primary-40)' }} />
+        <div className="drop-indicator-vert-right" />
       )}
 
-      <div
-        className="relative bg-white w-full aspect-[3/4] flex items-center justify-center thumb-card-rotate"
-        style={{
-          '--rotation': `${rotation}deg`,
-          borderRadius: 'var(--md-radius-md)',
-          overflow: 'hidden',
-          outline: selected ? '2px solid var(--md-primary-40)' : 'none',
-          outlineOffset: 2,
-        } as React.CSSProperties}
-      >
+      <div className={`relative bg-white w-full aspect-[3/4] flex items-center justify-center thumb-card-rotate ${selected ? 'selected-outline' : ''} ${rotation === 90 ? 'rot-90' : rotation === 180 ? 'rot-180' : rotation === 270 ? 'rot-270' : 'rot-0'}`}>
         {bitmap ? (
           <canvas ref={canvasRef} className="w-full h-full object-contain" />
         ) : (

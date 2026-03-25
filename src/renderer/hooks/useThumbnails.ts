@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useMupdf } from './useMupdf'
 
 type CacheKey = `${string}:${number}`
@@ -8,6 +8,17 @@ export function useThumbnails() {
   const mupdf = useMupdf()
   const cache = useRef<ThumbnailCache>(new Map())
   const [, setRevision] = useState(0)
+
+  // Close all cached bitmaps on unmount to free GPU resources
+  useEffect(() => {
+    const cacheRef = cache.current
+    return () => {
+      for (const bitmap of cacheRef.values()) {
+        bitmap.close()
+      }
+      cacheRef.clear()
+    }
+  }, [])
 
   const getThumbnail = useCallback(
     async (tabId: string, pageNum: number): Promise<ImageBitmap | null> => {
@@ -26,8 +37,11 @@ export function useThumbnails() {
   )
 
   const invalidate = useCallback((tabId: string) => {
-    for (const key of cache.current.keys()) {
-      if (key.startsWith(`${tabId}:`)) cache.current.delete(key)
+    for (const [key, bitmap] of cache.current.entries()) {
+      if (key.startsWith(`${tabId}:`)) {
+        bitmap.close()
+        cache.current.delete(key)
+      }
     }
     setRevision(r => r + 1)
   }, [])

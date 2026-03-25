@@ -72,17 +72,7 @@ export default function OrganiseMode() {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full overflow-auto p-6"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: 32,
-        padding: 32,
-        backgroundColor: 'var(--md-surface-dim)',
-      }}
-    >
+    <div ref={containerRef} className="h-full overflow-auto p-6 organise-grid">
       {pageOrder.map(page => (
         <PageThumbnail
           key={page}

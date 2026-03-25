@@ -5,6 +5,7 @@ import { useDialog } from '../context/DialogContext'
 import { useMupdf } from './useMupdf'
 import { createPageOrder } from '../utils/array'
 import type { Tab } from '../types/app'
+import useSave from './useSave'
 
 declare global {
   interface Window {
@@ -38,30 +39,15 @@ export function useMenuEvents() {
   const { state, dispatch } = useApp()
   const { snackbar, confirm } = useDialog()
   const mupdf = useMupdf()
-
+  const { save, saveAs } = useSave()
   useEffect(() => {
     const api = window.electronAPI
-
-    /** Build the final PDF bytes, applying organise changes + annotations */
-    async function buildSaveBytes(tab: Tab): Promise<Uint8Array> {
-      if (hasOrganiseChanges(tab)) {
-        return mupdf.saveOrganised(tab.id, tab.pageOrder, tab.rotations, tab.annotations ?? {}, tab.scale)
-      }
-      return mupdf.saveWithAnnotations(tab.id, tab.annotations ?? {}, tab.scale)
-    }
 
     api.onMenuOpen(() => openFiles(false))
 
     api.onMenuSave(async () => {
-      const tab = state.tabs.find(t => t.id === state.activeTabId)
-      if (!tab) return
       try {
-        const bytes = await buildSaveBytes(tab)
-        const handle = await saveBytes(bytes, tab.fileName, tab.fileHandle, tab.filePath)
-        if (handle && !tab.fileHandle) {
-          dispatch({ type: 'UPDATE_TAB', payload: { tabId: tab.id, fileHandle: handle } })
-        }
-        dispatch({ type: 'MARK_CLEAN', payload: { tabId: tab.id } })
+        await save(false)
       } catch (err) {
         console.error('Save failed:', err)
         snackbar(`Save failed: ${err instanceof Error ? err.message : String(err)}`, 'error')
@@ -69,16 +55,8 @@ export function useMenuEvents() {
     })
 
     api.onMenuSaveAs(async () => {
-      const tab = state.tabs.find(t => t.id === state.activeTabId)
-      if (!tab) return
       try {
-        const bytes = await buildSaveBytes(tab)
-        // Force Save As: pass no handle, no path
-        const handle = await saveBytes(bytes, tab.fileName, null, null)
-        if (handle) {
-          dispatch({ type: 'UPDATE_TAB', payload: { tabId: tab.id, fileHandle: handle } })
-        }
-        dispatch({ type: 'MARK_CLEAN', payload: { tabId: tab.id } })
+        await saveAs()
       } catch (err) {
         console.error('Save As failed:', err)
         snackbar(`Save failed: ${err instanceof Error ? err.message : String(err)}`, 'error')
@@ -97,7 +75,7 @@ export function useMenuEvents() {
         })
         if (!ok) return
       }
-      mupdf.closeDocument(state.activeTabId)
+      // closeDocument is handled automatically by AppProvider when tab is removed
       dispatch({ type: 'CLOSE_TAB', payload: { tabId: state.activeTabId } })
     })
 

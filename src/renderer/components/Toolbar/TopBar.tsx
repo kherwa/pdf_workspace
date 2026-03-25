@@ -55,10 +55,7 @@ export default function TopBar() {
   }
 
   return (
-    <div
-      className="toolbar justify-between"
-      style={{ borderTop: '1px solid var(--md-outline-30)' }}
-    >
+    <div className="toolbar justify-between border-top-outline">
       {/* Left: action buttons */}
       <div className="flex items-center gap-1">
         {([
@@ -79,18 +76,9 @@ export default function TopBar() {
         ))}
       </div>
 
-      {/* Right: save */}
+      {/* Right side reserved for future controls (Save is in the menu) */}
       <div className="flex items-center">
-        <button
-          onClick={() => api.triggerMenuSave()}
-          disabled={!activeTab}
-          className="btn-icon-xs"
-          style={{ opacity: !activeTab ? 0.38 : 1 }}
-          aria-label="Save"
-          title={`Save (${isMac ? '⌘S' : 'Ctrl+S'})`}
-        >
-          <SaveIcon size={20} />
-        </button>
+        {/* Save is available from the Menu (File → Save / Save As). */}
       </div>
     </div>
   )

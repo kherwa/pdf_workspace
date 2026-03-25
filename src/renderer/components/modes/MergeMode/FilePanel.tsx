@@ -28,41 +28,15 @@ function ThumbnailCard({ tabId, page, selected, onToggle }: { tabId: string; pag
   return (
     <button
       onClick={onToggle}
-      className="relative flex flex-col items-center gap-1.5 shrink-0 transition-colors"
-      style={{
-        outline: selected ? '2px solid var(--md-error-40)' : 'none',
-        outlineOffset: 2,
-        backgroundColor: selected ? 'var(--md-error-08)' : 'transparent',
-        borderRadius: 'var(--md-radius-md)',
-        padding: 4,
-      }}
+      className={`relative flex flex-col items-center gap-1.5 shrink-0 transition-colors ${selected ? 'thumb-selected' : ''}`}
     >
-      <div
-        className="relative bg-white flex items-center justify-center thumb-card"
-        style={{
-          width: 130,
-          height: 180,
-          borderRadius: 'var(--md-radius-sm)',
-          overflow: 'hidden',
-        }}
-      >
-        <canvas
-          ref={canvasRef}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            display: loaded ? 'block' : 'none',
-          }}
-        />
+      <div className="relative bg-white flex items-center justify-center thumb-card">
+        <canvas ref={canvasRef} className={`thumb-canvas ${loaded ? '' : 'hidden'}`} />
         {!loaded && (
           <div className="w-full h-full animate-pulse bg-surface-container" />
         )}
         {selected && (
-          <span
-            className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: 'var(--md-error-40)', color: 'var(--md-on-error)', fontSize: 10, fontWeight: 700 }}
-          >
+          <span className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center selected-badge">
             <XIcon size={12} />
           </span>
         )}
@@ -116,31 +90,21 @@ export default function FilePanel({ source }: Props) {
   return (
     <div
       ref={ref}
-      style={{
-        opacity: isDragging ? 0.4 : 1,
-        borderRadius: 'var(--md-radius-md)',
-        boxShadow: 'var(--md-elevation-1)',
-        position: 'relative',
-      }}
-      className="flex flex-col shrink-0 overflow-hidden"
+      className={`flex flex-col shrink-0 overflow-hidden file-panel ${isDragging ? 'dragging' : ''}`}
     >
       {/* Drop indicator — top edge */}
       {closestEdge === 'top' && (
-        <div style={{ position: 'absolute', top: -4, left: 0, right: 0, height: 3, borderRadius: 2, backgroundColor: 'var(--md-primary-40)', zIndex: 10 }} />
+        <div className="drop-indicator top" />
       )}
       {/* Drop indicator — bottom edge */}
       {closestEdge === 'bottom' && (
-        <div style={{ position: 'absolute', bottom: -4, left: 0, right: 0, height: 3, borderRadius: 2, backgroundColor: 'var(--md-primary-40)', zIndex: 10 }} />
+        <div className="drop-indicator bottom" />
       )}
 
       {/* Header — drag handle */}
       <div
         ref={handleRef}
-        className="flex items-center justify-between px-3 py-2 cursor-grab active:cursor-grabbing"
-        style={{
-          backgroundColor: 'var(--md-surface-bright)',
-          borderBottom: '1px solid var(--md-outline-20)',
-        }}
+        className="flex items-center justify-between px-3 py-2 cursor-grab active:cursor-grabbing file-panel-header"
       >
         <div className="flex items-center gap-2 min-w-0">
           <GripVerticalIcon size={16} className="shrink-0 text-on-surface-muted" />
@@ -154,8 +118,7 @@ export default function FilePanel({ source }: Props) {
           <button
             onPointerDown={e => e.stopPropagation()}
             onClick={() => dispatch({ type: 'REMOVE_MERGE_SOURCE', payload: { tabId: source.tabId } })}
-            className="btn-icon-sm shrink-0"
-            style={{ width: 28, height: 28 }}
+            className="btn-icon-sm shrink-0 btn-icon-28"
             aria-label={`Remove ${source.fileName}`}
           >
             <XIcon size={16} />
@@ -164,10 +127,7 @@ export default function FilePanel({ source }: Props) {
       </div>
 
       {/* Page thumbnails — horizontal scroll */}
-      <div
-        className="flex items-start gap-3 p-4 overflow-x-auto"
-        style={{ backgroundColor: 'var(--md-surface-dim)' }}
-      >
+      <div className="flex items-start gap-3 p-4 overflow-x-auto filepanel-pages-bg">
         {pages.map(p => (
           <ThumbnailCard
             key={p}

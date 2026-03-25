@@ -342,6 +342,7 @@ const api = {
   getPageInfo: (tabId: string, pageNum: number): Promise<PageInfo> =>
     withDoc(tabId, doc =>
       withPage(doc, pageNum - 1, page => {
+        // getBounds() already accounts for inherent /Rotate — returns oriented dimensions
         const [x0, y0, x1, y1] = page.getBounds() as [number, number, number, number]
         return { width: x1 - x0, height: y1 - y0, rotation: 0 }
       }),

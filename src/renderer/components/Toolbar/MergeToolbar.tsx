@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { useDialog } from '../../context/DialogContext'
 import { useMupdf } from '../../hooks/useMupdf'
 import { useFileSystem } from '../../hooks/useFileSystem'
+import { appendSuffixToFileName } from '../../utils/file'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { createPageOrder } from '../../utils/array'
 import { PlusIcon, XIcon, FolderOpenIcon, FileIcon, ChevronDownIcon } from '../shared/Icons'
@@ -47,7 +48,7 @@ export default function MergeToolbar() {
       title: 'Save merged document as',
       message: 'Enter a file name for the merged PDF:',
       defaultValue: 'merged.pdf',
-      confirmLabel: 'Merge & Save',
+      confirmLabel: 'Merge',
     })
     if (!fileName) return // cancelled
 
@@ -70,17 +71,17 @@ export default function MergeToolbar() {
       dispatch({ type: 'UPDATE_TAB', payload: { tabId, fileName: finalName, isLoading: true } })
     }
 
-    try {
-      const { numPages } = await mupdf.openDocument(tabId, bytes.buffer)
-      dispatch({
-        type: 'UPDATE_TAB',
-        payload: {
-          tabId, numPages,
-          fileName: finalName,
-          pageOrder: createPageOrder(numPages),
-          isLoading: false,
-        },
-      })
+      try {
+        const { numPages } = await mupdf.openDocument(tabId, bytes.buffer)
+        dispatch({
+          type: 'UPDATE_TAB',
+          payload: {
+            tabId, numPages,
+            fileName: finalName,
+            pageOrder: createPageOrder(numPages),
+            isLoading: false,
+          },
+        })
       // Clean up merge-only worker documents (not backed by a real tab)
       for (const src of state.mergeSources) {
         if (!state.tabs.some(t => t.id === src.tabId)) {
@@ -90,16 +91,11 @@ export default function MergeToolbar() {
       }
       dispatch({ type: 'SET_MODE', payload: { mode: 'view' } })
 
-      // Automatically prompt Save As for merged document
+      // Prompt Save As for merged document (append _merged suffix)
       try {
-        const target = await (window as any).showSaveFilePicker({
-          suggestedName: finalName,
-          types: [{ description: 'PDF Files', accept: { 'application/pdf': ['.pdf'] } }],
-        })
-        const writable = await target.createWritable()
-        await writable.write(bytes)
-        await writable.close()
-        dispatch({ type: 'UPDATE_TAB', payload: { tabId, fileHandle: target } })
+        const suggested = appendSuffixToFileName(finalName, '_merged')
+        const handle = await (await import('../../hooks/useFileSystem')).saveBytes(bytes, suggested, null, null)
+        if (handle) dispatch({ type: 'UPDATE_TAB', payload: { tabId, fileHandle: handle } })
       } catch {
         // User cancelled the save dialog — doc stays in memory only
       }
@@ -175,9 +171,9 @@ export default function MergeToolbar() {
       <button
         onClick={handleMerge}
         disabled={state.mergeSources.length < 2}
-        className="btn-compact"
+        className="btn-save btn-compact"
       >
-        Merge & Save
+        Merge
       </button>
 
       <button onClick={clearAll} className="btn-text ml-auto text-on-surface-variant">

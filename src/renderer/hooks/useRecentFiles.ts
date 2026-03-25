@@ -28,10 +28,11 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 async function loadAll(): Promise<RecentFile[]> {
+  let db: IDBDatabase | null = null
   try {
-    const db = await openDB()
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly')
+    db = await openDB()
+    return await new Promise((resolve, reject) => {
+      const tx = db!.transaction(STORE_NAME, 'readonly')
       const store = tx.objectStore(STORE_NAME)
       const req = store.getAll()
       req.onsuccess = () => {
@@ -42,29 +43,41 @@ async function loadAll(): Promise<RecentFile[]> {
     })
   } catch {
     return []
+  } finally {
+    db?.close()
   }
 }
 
 async function putFile(file: RecentFile): Promise<void> {
-  const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite')
-    const store = tx.objectStore(STORE_NAME)
-    store.put(file)
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error)
-  })
+  let db: IDBDatabase | null = null
+  try {
+    db = await openDB()
+    await new Promise<void>((resolve, reject) => {
+      const tx = db!.transaction(STORE_NAME, 'readwrite')
+      const store = tx.objectStore(STORE_NAME)
+      store.put(file)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  } finally {
+    db?.close()
+  }
 }
 
 async function clearAll(): Promise<void> {
-  const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite')
-    const store = tx.objectStore(STORE_NAME)
-    store.clear()
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error)
-  })
+  let db: IDBDatabase | null = null
+  try {
+    db = await openDB()
+    await new Promise<void>((resolve, reject) => {
+      const tx = db!.transaction(STORE_NAME, 'readwrite')
+      const store = tx.objectStore(STORE_NAME)
+      store.clear()
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  } finally {
+    db?.close()
+  }
 }
 
 /* ── Hook ───────────────────────────────────────────────────────────── */

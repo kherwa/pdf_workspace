@@ -58,6 +58,22 @@ function createWindow() {
 
   registerAllHandlers(mainWindow)
   buildMenu(mainWindow)
+
+  // Listen for OS theme changes and notify renderer so theme updates while app is open
+  nativeTheme.on('updated', () => {
+    try {
+      const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('theme:system', theme)
+        if (process.platform === 'win32' && mainWindow.setTitleBarOverlay) {
+          const colors = theme === 'light' ? { color: '#ffffff', symbolColor: '#222222' } : { color: '#161616', symbolColor: '#e6e6e6' }
+          mainWindow.setTitleBarOverlay({ ...colors, height: 40 })
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+  })
 }
 
 app.whenReady().then(() => {

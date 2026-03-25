@@ -1,6 +1,7 @@
-import { createContext, useContext, useReducer, type ReactNode } from 'react'
+import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from 'react'
 import type { AppState, Action, Tab } from '../types/app'
 import { defaultCompressionSettings } from '../types/compress'
+import { useMupdf } from '../hooks/useMupdf'
 
 export const initialState: AppState = {
   tabs: [],
@@ -31,7 +32,7 @@ export function reducer(state: AppState, action: Action): AppState {
         state.activeTabId === action.payload.tabId
           ? (tabs.at(-1)?.id ?? null)
           : state.activeTabId
-      return { ...state, tabs, activeTabId, ...(tabs.length === 0 ? { mode: 'view' as const, drawerView: 'home' as const } : {}) }
+      return { ...state, tabs, activeTabId, ...(tabs.length === 0 ? { mode: 'view' as const, drawerView: 'home' as const, drawerCollapsed: false } : {}) }
     }
 
     case 'SET_ACTIVE_TAB':
@@ -279,6 +280,20 @@ const AppContext = createContext<AppContextValue | null>(null)
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
   const activeTab = state.tabs.find(t => t.id === state.activeTabId) ?? null
+  const mupdf = useMupdf()
+  const prevTabIdsRef = useRef<Set<string>>(new Set())
+
+  // Auto-cleanup: close worker documents when tabs are removed
+  useEffect(() => {
+    const currentIds = new Set(state.tabs.map(t => t.id))
+    for (const id of prevTabIdsRef.current) {
+      if (!currentIds.has(id)) {
+        mupdf.closeDocument(id)
+      }
+    }
+    prevTabIdsRef.current = currentIds
+  }, [state.tabs, mupdf])
+
   return (
     <AppContext.Provider value={{ state, dispatch, activeTab }}>
       {children}

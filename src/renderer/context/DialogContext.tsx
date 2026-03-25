@@ -215,21 +215,14 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           <div className="dialog" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
             <h2 className="dialog-title">{promptDlg.title}</h2>
             {promptDlg.message && <p className="dialog-body">{promptDlg.message}</p>}
-            <div style={{ padding: '0 24px 16px' }}>
+            <div className="dialog-section-padding">
               <input
                 type="text"
                 value={promptValue}
                 onChange={e => setPromptValue(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handlePromptClose(true) }}
                 autoFocus
-                className="w-full rounded-md focus:outline-none"
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: 'var(--md-surface-container)',
-                  border: '1px solid var(--md-outline-30)',
-                  color: 'var(--md-on-surface)',
-                  fontSize: 14,
-                }}
+                className="w-full rounded-md focus:outline-none dialog-input"
               />
             </div>
             <div className="dialog-actions">
@@ -250,13 +243,12 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           <div className="dialog" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
             <h2 className="dialog-title">{selectDlg.title}</h2>
             {selectDlg.message && <p className="dialog-body">{selectDlg.message}</p>}
-            <div className="flex flex-col gap-1" style={{ padding: '0 24px 16px' }}>
+            <div className="flex flex-col gap-1 dialog-section-padding">
               {selectDlg.options.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => handleSelectClose(opt.value)}
-                  className="dropdown-item"
-                  style={{ borderRadius: 8 }}
+                  className="dropdown-item dialog-item-rounded"
                 >
                   <span className="text-label-large">{opt.label}</span>
                 </button>

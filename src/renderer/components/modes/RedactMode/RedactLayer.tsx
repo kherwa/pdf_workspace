@@ -13,7 +13,7 @@ export default function RedactLayer() {
   const width = canvas?.clientWidth || canvas?.width || 800
   const height = canvas?.clientHeight || canvas?.height || 1000
 
-  // Get mouse position in scaled canvas pixels
+  // Get mouse position in canvas (CSS) pixels
   const getPos = useCallback((e: React.MouseEvent) => {
     const svg = svgRef.current
     if (!svg) return { x: 0, y: 0 }
@@ -43,10 +43,11 @@ export default function RedactLayer() {
         id: crypto.randomUUID(),
         page: activeTab.currentPage,
         type: 'redaction',
-        x: Math.min(startX, currentX) / scale,
-        y: Math.min(startY, currentY) / scale,
-        width: w / scale,
-        height: h / scale,
+        // Store coordinates in canvas (CSS) pixels to match other annotations
+        x: Math.min(startX, currentX),
+        y: Math.min(startY, currentY),
+        width: w,
+        height: h,
       }
       dispatch({ type: 'ADD_REDACTION', payload: { tabId: activeTab.id, page: activeTab.currentPage, rect } })
     }
@@ -56,7 +57,7 @@ export default function RedactLayer() {
   const pageRedactions: RedactionRect[] = activeTab?.redactions[activeTab.currentPage] ?? []
 
   return (
-    <div className="absolute inset-0" style={{ cursor: 'crosshair' }}>
+    <div className="absolute inset-0 cursor-crosshair">
       <svg
         ref={svgRef}
         width={width}
@@ -68,8 +69,8 @@ export default function RedactLayer() {
         {/* Render stored redactions — scale from PDF points back to canvas pixels */}
         {pageRedactions.map(r => (
           <rect key={r.id}
-            x={r.x * scale} y={r.y * scale}
-            width={r.width * scale} height={r.height * scale}
+            x={r.x} y={r.y}
+            width={r.width} height={r.height}
             fill="black" opacity={0.85} />
         ))}
         {/* Live drawing preview — already in canvas pixels */}

@@ -21,7 +21,7 @@ export default function EditBar() {
 
   return (
     <div className="toolbar">
-      <span className="text-body-small text-on-surface-muted" style={{ marginRight: 8 }}>
+      <span className="text-body-small text-on-surface-muted mr-2">
         Select a tool to annotate
       </span>
 
@@ -31,12 +31,7 @@ export default function EditBar() {
         <button
           key={id}
           onClick={() => setTool(id)}
-          className="btn-compact"
-          style={{
-            backgroundColor: activeTool === id ? 'var(--md-secondary-container)' : undefined,
-            color: activeTool === id ? 'var(--md-secondary-40)' : undefined,
-            borderColor: activeTool === id ? 'var(--md-secondary-40)' : undefined,
-          }}
+          className={`btn-compact ${activeTool === id ? 'tool-active' : ''}`}
           title={label}
           aria-label={label}
         >

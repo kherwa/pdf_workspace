@@ -99,7 +99,7 @@ export default function MergeMode() {
         </button>
 
         {showMenu && (
-          <div className="dropdown min-w-[320px]" style={{ top: '100%', marginTop: 4 }}>
+          <div className="dropdown min-w-[320px] dropdown-below">
             <button
               onClick={() => { setShowMenu(false); openFilesForMerge() }}
               className="dropdown-item"
