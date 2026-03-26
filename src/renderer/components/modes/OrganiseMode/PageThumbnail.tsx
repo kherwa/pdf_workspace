@@ -5,6 +5,7 @@ import { renderBitmapToCanvas } from '../../../utils/canvas'
 
 interface Props {
   page: number
+  displayIndex: number
   tabId: string
   bitmap: ImageBitmap | null
   rotation: number
@@ -15,7 +16,7 @@ interface Props {
   onRotateCCW: () => void
 }
 
-export default function PageThumbnail({ page, tabId, bitmap, rotation, selected, onSelect, onDelete, onRotateCW, onRotateCCW }: Props) {
+export default function PageThumbnail({ page, displayIndex, tabId, bitmap, rotation, selected, onSelect, onDelete, onRotateCW, onRotateCCW }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const ref = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -72,7 +73,7 @@ export default function PageThumbnail({ page, tabId, bitmap, rotation, selected,
           <div className="w-full h-full animate-pulse bg-surface-container" />
         )}
       </div>
-      <span className="text-label-small text-on-surface-muted">{page}</span>
+      <span className="text-label-small text-on-surface-muted">{displayIndex}</span>
     </div>
   )
 }

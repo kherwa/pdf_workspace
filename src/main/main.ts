@@ -51,6 +51,14 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => mainWindow.show())
 
+  // Notify renderer of fullscreen changes (macOS traffic lights hide in fullscreen)
+  mainWindow.on('enter-full-screen', () => {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send('fullscreen:changed', true)
+  })
+  mainWindow.on('leave-full-screen', () => {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send('fullscreen:changed', false)
+  })
+
   // Fallback: force show after 3s in case ready-to-show doesn't fire
   setTimeout(() => {
     if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) mainWindow.show()

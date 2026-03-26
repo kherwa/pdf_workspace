@@ -73,10 +73,11 @@ export default function OrganiseMode() {
 
   return (
     <div ref={containerRef} className="h-full overflow-auto p-6 organise-grid">
-      {pageOrder.map(page => (
+      {pageOrder.map((page, idx) => (
         <PageThumbnail
           key={page}
           page={page}
+          displayIndex={idx + 1}
           tabId={tabId}
           bitmap={getCached(tabId, page)}
           rotation={activeTab.rotations[page] ?? 0}

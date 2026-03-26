@@ -6,7 +6,7 @@ import { useMupdf } from '../../hooks/useMupdf'
 import { useRecentFiles } from '../../hooks/useRecentFiles'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { createPageOrder } from '../../utils/array'
-import { MenuIcon, HomeIcon, XIcon, PlusIcon } from '../shared/Icons'
+import { MenuIcon, HomeIcon, XIcon, PlusIcon, MergeIcon, ChevronDownIcon, FileIcon } from '../shared/Icons'
 
 const api = (window as any).electronAPI
 const platform: string = api?.platform ?? 'win32'
@@ -51,6 +51,7 @@ const CONVERTIBLE_TYPES = [
 
 export default function MenuBar() {
   const [openMenu, setOpenMenu] = useState<number | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const barRef = useRef<HTMLDivElement>(null)
   const { state, dispatch } = useApp()
   const { snackbar, confirm } = useDialog()
@@ -58,7 +59,33 @@ export default function MenuBar() {
   const { addRecent } = useRecentFiles()
   const activeTab = state.tabs.find(t => t.id === state.activeTabId) ?? null
 
+  useEffect(() => {
+    api?.onFullscreenChanged?.((fs: boolean) => setIsFullscreen(fs))
+    return () => api?.removeAllListeners?.('fullscreen:changed')
+  }, [])
+
+  const [showCreateMenu, setShowCreateMenu] = useState(false)
+  const createMenuRef = useRef<HTMLDivElement>(null)
+  const closeCreateMenu = useCallback(() => setShowCreateMenu(false), [])
+  useClickOutside(createMenuRef, showCreateMenu, closeCreateMenu)
+
+  function handleMerge() {
+    setShowCreateMenu(false)
+    // Create or activate a "New Document" tab for the merge
+    const existing = state.tabs.find(t => t.fileName === 'New Document')
+    if (!existing) {
+      const tabId = crypto.randomUUID()
+      dispatch({ type: 'OPEN_TAB', payload: makeTab({ id: tabId, fileName: 'New Document', numPages: 0 }) })
+    } else {
+      dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: existing.id } })
+    }
+    dispatch({ type: 'SET_MODE', payload: { mode: 'merge' } })
+    // Collapse the nav drawer so merge gets full space
+    if (!state.drawerCollapsed) dispatch({ type: 'TOGGLE_DRAWER' })
+  }
+
   async function handleCreate() {
+    setShowCreateMenu(false)
     let handles: FileSystemFileHandle[]
     try {
       handles = await (window as any).showOpenFilePicker({
@@ -122,6 +149,18 @@ export default function MenuBar() {
       if (!ok) return
       dispatch({ type: 'REMOVE_MERGE_SOURCE', payload: { tabId } })
     }
+    // If closing the merge tab, clean up merge mode
+    const tab2 = state.tabs.find(t => t.id === tabId)
+    if (tab2?.fileName === 'New Document' && state.mode === 'merge') {
+      for (const src of state.mergeSources) {
+        if (!state.tabs.some(t => t.id === src.tabId)) {
+          mupdf.closeDocument(src.tabId)
+        }
+        dispatch({ type: 'REMOVE_MERGE_SOURCE', payload: { tabId: src.tabId } })
+      }
+      dispatch({ type: 'SET_MODE', payload: { mode: 'view' } })
+    }
+
     mupdf.closeDocument(tabId)
     dispatch({ type: 'CLOSE_TAB', payload: { tabId } })
   }
@@ -138,7 +177,7 @@ export default function MenuBar() {
   }, [])
 
   return (
-    <div ref={barRef} className={`titlebar ${isMac ? 'platform-mac' : isLinux ? 'platform-linux' : 'platform-win'}`}>
+    <div ref={barRef} className={`titlebar ${isMac ? (isFullscreen ? 'platform-mac-fs' : 'platform-mac') : isLinux ? 'platform-linux' : 'platform-win'}`}>
       {/* Menu buttons — hidden on macOS (native menu handles shortcuts) */}
       {!isMac && (
         <>
@@ -203,16 +242,38 @@ export default function MenuBar() {
 
       <div className="divider-v" />
 
-      {/* Create button */}
-      <button
-        onClick={handleCreate}
-        className="btn-toggle titlebar-no-drag"
-        aria-label="Create PDF from file"
-        title="Create PDF from image, document, or text file"
-      >
-        <PlusIcon size={18} />
-        Create
-      </button>
+      {/* Create split button */}
+      <div className="relative flex titlebar-no-drag" ref={createMenuRef}>
+        <button
+          onClick={handleCreate}
+          className="btn-toggle split-left"
+          aria-label="Create PDF from file"
+          title="Create PDF from image, document, or text file"
+        >
+          <PlusIcon size={18} />
+          Create
+        </button>
+        <button
+          onClick={() => setShowCreateMenu(!showCreateMenu)}
+          className="btn-toggle split-right"
+          aria-label="More create options"
+        >
+          <ChevronDownIcon size={14} />
+        </button>
+        {showCreateMenu && (
+          <div className="dropdown min-w-[200px]">
+            <button onClick={handleCreate} className="dropdown-item">
+              <FileIcon size={16} />
+              <span className="text-label-large">Create PDF from File</span>
+            </button>
+            <div className="divider-h" />
+            <button onClick={handleMerge} className="dropdown-item">
+              <MergeIcon size={16} />
+              <span className="text-label-large">Merge PDFs</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="divider-v" />
 

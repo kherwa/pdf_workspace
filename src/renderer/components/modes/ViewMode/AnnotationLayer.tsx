@@ -21,20 +21,13 @@ interface TextInputState {
 }
 
 /* ── Static annotation shape renderer ────────────────────────────────── */
-function AnnotationShape({ ann, selected, onSelect }: {
+function AnnotationShape({ ann, scale, selected, onSelect }: {
   ann: Annotation
+  scale: number
   selected: boolean
   onSelect: (id: string) => void
 }) {
-  const outline = selected ? (
-    <rect
-      x={(ann as any).x - 2} y={(ann as any).y - 2}
-      width={((ann as any).width ?? (ann as any).radiusX * 2) + 4}
-      height={((ann as any).height ?? (ann as any).radiusY * 2) + 4}
-      fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3"
-      rx={2} ry={2}
-    />
-  ) : null
+  const s = scale
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation()
@@ -42,59 +35,70 @@ function AnnotationShape({ ann, selected, onSelect }: {
   }
 
   switch (ann.type) {
-    case 'highlight':
+    case 'highlight': {
+      const x = ann.x * s, y = ann.y * s, w = ann.width * s, h = ann.height * s
       return <g onClick={handleClick} className="cursor-pointer">
-        {outline}
-        <rect x={ann.x} y={ann.y} width={ann.width} height={ann.height}
+        {selected && <rect x={x - 2} y={y - 2} width={w + 4} height={h + 4}
+          fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" rx={2} ry={2} />}
+        <rect x={x} y={y} width={w} height={h}
           fill={ann.color} opacity={ann.opacity} />
       </g>
-    case 'text':
+    }
+    case 'text': {
+      const x = ann.x * s, y = ann.y * s, fs = ann.fontSize * s
       return <g onClick={handleClick} className="cursor-pointer">
-        <text x={ann.x} y={ann.y + ann.fontSize} fontSize={ann.fontSize}
+        <text x={x} y={y + fs} fontSize={fs}
           fill={ann.color} className="no-select">{ann.text}</text>
-        {selected && <rect x={ann.x - 2} y={ann.y - 2} width={104} height={ann.fontSize + 8}
+        {selected && <rect x={x - 2} y={y - 2} width={104 * s} height={fs + 8}
           fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" rx={2} ry={2} />}
-      </g>
-    case 'freehand': {
-      if (ann.points.length < 4) return null
-      let d = `M ${ann.points[0]} ${ann.points[1]}`
-      for (let i = 2; i < ann.points.length; i += 2) {
-        d += ` L ${ann.points[i]} ${ann.points[i + 1]}`
-      }
-      return <g onClick={handleClick} className="cursor-pointer">
-        <path d={d} stroke={ann.color} strokeWidth={ann.lineWidth}
-          fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        {/* Wider invisible hit area */}
-        <path d={d} stroke="transparent" strokeWidth={Math.max(ann.lineWidth + 8, 12)} fill="none" />
       </g>
     }
-    case 'rect':
+    case 'freehand': {
+      if (ann.points.length < 4) return null
+      let d = `M ${ann.points[0] * s} ${ann.points[1] * s}`
+      for (let i = 2; i < ann.points.length; i += 2) {
+        d += ` L ${ann.points[i] * s} ${ann.points[i + 1] * s}`
+      }
+      const lw = ann.lineWidth * s
       return <g onClick={handleClick} className="cursor-pointer">
-        {selected && <rect x={ann.x - 3} y={ann.y - 3} width={ann.width + 6} height={ann.height + 6}
+        <path d={d} stroke={ann.color} strokeWidth={lw}
+          fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={d} stroke="transparent" strokeWidth={Math.max(lw + 8, 12)} fill="none" />
+      </g>
+    }
+    case 'rect': {
+      const x = ann.x * s, y = ann.y * s, w = ann.width * s, h = ann.height * s, lw = ann.lineWidth * s
+      return <g onClick={handleClick} className="cursor-pointer">
+        {selected && <rect x={x - 3} y={y - 3} width={w + 6} height={h + 6}
           fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" rx={2} ry={2} />}
-        <rect x={ann.x} y={ann.y} width={ann.width} height={ann.height}
-          stroke={ann.color} strokeWidth={ann.lineWidth} fill="transparent" />
+        <rect x={x} y={y} width={w} height={h}
+          stroke={ann.color} strokeWidth={lw} fill="transparent" />
       </g>
-    case 'ellipse':
+    }
+    case 'ellipse': {
+      const cx = ann.x * s, cy = ann.y * s, rx = ann.radiusX * s, ry = ann.radiusY * s, lw = ann.lineWidth * s
       return <g onClick={handleClick} className="cursor-pointer">
-        {selected && <ellipse cx={ann.x} cy={ann.y} rx={ann.radiusX + 3} ry={ann.radiusY + 3}
+        {selected && <ellipse cx={cx} cy={cy} rx={rx + 3} ry={ry + 3}
           fill="none" stroke="var(--md-primary-40)" strokeWidth={1.5} strokeDasharray="4 3" />}
-        <ellipse cx={ann.x} cy={ann.y} rx={ann.radiusX} ry={ann.radiusY}
-          stroke={ann.color} strokeWidth={ann.lineWidth} fill="transparent" />
+        <ellipse cx={cx} cy={cy} rx={rx} ry={ry}
+          stroke={ann.color} strokeWidth={lw} fill="transparent" />
       </g>
-    case 'ocrEdit':
+    }
+    case 'ocrEdit': {
+      const x = ann.x * s, y = ann.y * s, w = ann.width * s, h = ann.height * s, fs = ann.fontSize * s
       return <>
-        <rect x={ann.x} y={ann.y} width={ann.width} height={ann.height} fill="white" />
-        <text x={ann.x} y={ann.y + ann.fontSize} fontSize={ann.fontSize}
+        <rect x={x} y={y} width={w} height={h} fill="white" />
+        <text x={x} y={y + fs} fontSize={fs}
           fontFamily={ann.fontFamily} fontStyle={ann.fontStyle}
           fontWeight={ann.fontWeight} fill="black" className="no-select">{ann.newText}</text>
       </>
+    }
     default:
       return null
   }
 }
 
-/* ── Preview shape while drawing ────────────────────────────────────── */
+/* ── Preview shape while drawing (screen coords, not scaled) ──────── */
 function PreviewShape({ drawing, color }: { drawing: DrawingState; color: string }) {
   const { tool, startX, startY, currentX, currentY, points } = drawing
   if (tool === 'highlight')
@@ -127,11 +131,12 @@ export default function AnnotationLayer() {
   const svgRef = useRef<SVGSVGElement>(null)
   const textInputRef = useRef<HTMLTextAreaElement>(null)
 
+  const scale = activeTab?.scale ?? 1
+
   function getCanvasDims() {
     const svg = svgRef.current
     const canvas = svg?.parentElement?.parentElement?.querySelector('canvas')
     if (!canvas) return { width: 800, height: 1000 }
-    // Use CSS (logical) dimensions, not canvas.width which includes DPR scaling
     return {
       width: canvas.clientWidth || canvas.width,
       height: canvas.clientHeight || canvas.height,
@@ -149,7 +154,6 @@ export default function AnnotationLayer() {
     if (!selectedId || !activeTab) return
     function handleKey(e: KeyboardEvent) {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && activeTab) {
-        // Remove the selected annotation from state
         const page = activeTab.currentPage
         const anns = activeTab.annotations[page] ?? []
         const idx = anns.findIndex(a => a.id === selectedId)
@@ -182,10 +186,11 @@ export default function AnnotationLayer() {
 
   function commitText(value: string) {
     if (value.trim() && activeTab && textInput) {
+      // Store in PDF-point coords (divide by scale)
       add(activeTab.currentPage, {
         id: crypto.randomUUID(), page: activeTab.currentPage,
-        type: 'text', x: textInput.x, y: textInput.y, text: value.trim(),
-        fontSize: 14, color: activeTab.activeColor,
+        type: 'text', x: textInput.x / scale, y: textInput.y / scale, text: value.trim(),
+        fontSize: 14 / scale, color: activeTab.activeColor,
       })
     }
     setTextInput(null)
@@ -196,7 +201,6 @@ export default function AnnotationLayer() {
       if (e.target !== textInputRef.current) commitText(textInputRef.current?.value ?? '')
       return
     }
-    // If no tool active, clicking SVG background deselects
     if (!activeTab?.activeTool) {
       setSelectedId(null)
       return
@@ -221,17 +225,20 @@ export default function AnnotationLayer() {
     const w = currentX - startX
     const h = currentY - startY
     const minSize = 4
+    const s = scale
 
+    // All coordinates are normalized to PDF points (divided by current scale)
     if (tool === 'text' && Math.abs(w) > minSize && Math.abs(h) > minSize) {
       setTextInput({ x: Math.min(startX, currentX), y: Math.min(startY, currentY), width: Math.abs(w), height: Math.abs(h) })
     } else if (tool === 'highlight' && Math.abs(w) > minSize && Math.abs(h) > minSize) {
-      add(page, { id, page, type: 'highlight', x: Math.min(startX, currentX), y: Math.min(startY, currentY), width: Math.abs(w), height: Math.abs(h), color, opacity: 0.4 })
+      add(page, { id, page, type: 'highlight', x: Math.min(startX, currentX) / s, y: Math.min(startY, currentY) / s, width: Math.abs(w) / s, height: Math.abs(h) / s, color, opacity: 0.4 })
     } else if (tool === 'freehand' && points.length > 4) {
-      add(page, { id, page, type: 'freehand', points, color, lineWidth: 2 })
+      const normPts = points.map(v => v / s)
+      add(page, { id, page, type: 'freehand', points: normPts, color, lineWidth: 2 / s })
     } else if (tool === 'rect' && Math.abs(w) > minSize && Math.abs(h) > minSize) {
-      add(page, { id, page, type: 'rect', x: Math.min(startX, currentX), y: Math.min(startY, currentY), width: Math.abs(w), height: Math.abs(h), color, lineWidth: 2 })
+      add(page, { id, page, type: 'rect', x: Math.min(startX, currentX) / s, y: Math.min(startY, currentY) / s, width: Math.abs(w) / s, height: Math.abs(h) / s, color, lineWidth: 2 / s })
     } else if (tool === 'ellipse' && Math.abs(w) > minSize && Math.abs(h) > minSize) {
-      add(page, { id, page, type: 'ellipse', x: (startX + currentX) / 2, y: (startY + currentY) / 2, radiusX: Math.abs(w) / 2, radiusY: Math.abs(h) / 2, color, lineWidth: 2 })
+      add(page, { id, page, type: 'ellipse', x: (startX + currentX) / 2 / s, y: (startY + currentY) / 2 / s, radiusX: Math.abs(w) / 2 / s, radiusY: Math.abs(h) / 2 / s, color, lineWidth: 2 / s })
     }
     setDrawing(null)
   }
@@ -254,6 +261,7 @@ export default function AnnotationLayer() {
           <AnnotationShape
             key={ann.id}
             ann={ann}
+            scale={scale}
             selected={selectedId === ann.id}
             onSelect={setSelectedId}
           />

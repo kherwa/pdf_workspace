@@ -1,6 +1,6 @@
 import { useApp } from '../../context/AppContext'
 import type { ToolName } from '../../types/annotations'
-import { HighlightIcon, TypeIcon, PenIcon, SquareIcon, CircleIcon, PaletteIcon, UndoIcon } from '../shared/Icons'
+import { HighlightIcon, TypeIcon, PenIcon, SquareIcon, CircleIcon, UndoIcon } from '../shared/Icons'
 
 const TOOLS: { id: ToolName; label: string; Icon: React.FC<{ size?: number; className?: string }> }[] = [
   { id: 'highlight', label: 'Highlight', Icon: HighlightIcon },
@@ -8,6 +8,14 @@ const TOOLS: { id: ToolName; label: string; Icon: React.FC<{ size?: number; clas
   { id: 'freehand',  label: 'Draw',      Icon: PenIcon },
   { id: 'rect',      label: 'Rectangle', Icon: SquareIcon },
   { id: 'ellipse',   label: 'Ellipse',   Icon: CircleIcon },
+]
+
+const COLORS = [
+  { value: '#FFFF00', label: 'Yellow' },
+  { value: '#00FF00', label: 'Green' },
+  { value: '#FF0000', label: 'Red' },
+  { value: '#0000FF', label: 'Blue' },
+  { value: '#8B4513', label: 'Brown' },
 ]
 
 export default function EditBar() {
@@ -42,16 +50,18 @@ export default function EditBar() {
 
       <div className="toolbar-sep" />
 
-      <label className="flex items-center gap-2" title="Color picker">
-        <PaletteIcon size={20} className="text-on-surface-variant" />
-        <input
-          type="color"
-          value={activeColor}
-          onChange={e => dispatch({ type: 'SET_COLOR', payload: { tabId, color: e.target.value } })}
-          className="w-8 h-8 rounded-lg bg-transparent border-0"
-          aria-label="Annotation color"
-        />
-      </label>
+      <div className="flex items-center gap-1.5" role="group" aria-label="Color picker">
+        {COLORS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => dispatch({ type: 'SET_COLOR', payload: { tabId, color: value } })}
+            className={`color-swatch ${activeColor === value ? 'color-swatch-active' : ''}`}
+            style={{ backgroundColor: value }}
+            title={label}
+            aria-label={label}
+          />
+        ))}
+      </div>
 
       <div className="toolbar-sep" />
 

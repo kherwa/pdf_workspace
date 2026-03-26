@@ -1,10 +1,9 @@
 import { useApp } from '../../context/AppContext'
 import { useTheme } from '../../hooks/useTheme'
-import { makeTab } from '../../hooks/useFileSystem'
 import type { AppMode, ComputerFolder } from '../../types/app'
 import {
   PenIcon, GridIcon, ShieldIcon,
-  MergeIcon, CompressIcon,
+  CompressIcon,
   ClockIcon, MonitorIcon, FolderIcon, DownloadIcon,
   SunIcon, MoonIcon, XIcon,
 } from '../shared/Icons'
@@ -18,7 +17,6 @@ const EDIT_ACTIONS: ActionItem[] = [
 ]
 
 const CONVERT_ACTIONS: ActionItem[] = [
-  { id: 'merge', label: 'Merge', Icon: MergeIcon },
   { id: 'compress', label: 'Compress', Icon: CompressIcon },
 ]
 
@@ -77,17 +75,6 @@ export default function ModeBar() {
       const isDeactivating = mode === id
       const newMode = (isDeactivating ? 'view' : id) as AppMode
       dispatch({ type: 'SET_MODE', payload: { mode: newMode } })
-
-      // Create "New Document" tab when entering merge mode
-      if (id === 'merge' && !isDeactivating) {
-        const existing = state.tabs.find(t => t.fileName === 'New Document')
-        if (!existing) {
-          const tabId = crypto.randomUUID()
-          dispatch({ type: 'OPEN_TAB', payload: makeTab({ id: tabId, fileName: 'New Document', numPages: 0 }) })
-        } else {
-          dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: existing.id } })
-        }
-      }
 
       if (activeTab?.editMode) {
         dispatch({ type: 'SET_EDIT_MODE', payload: { tabId: activeTab.id, editMode: false } })

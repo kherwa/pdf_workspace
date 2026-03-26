@@ -34,21 +34,29 @@ export function registerAllHandlers(win: BrowserWindow) {
   // List PDF files in a directory
   ipcMain.handle('fs:listPDFs', (_e, dirPath: string) => {
     try {
+      // Verify directory exists and is accessible
+      fs.accessSync(dirPath, fs.constants.R_OK)
       const entries = fs.readdirSync(dirPath, { withFileTypes: true })
       return entries
         .filter(e => e.isFile() && e.name.toLowerCase().endsWith('.pdf'))
         .map(e => {
-          const fullPath = path.join(dirPath, e.name)
-          const stat = fs.statSync(fullPath)
-          return {
-            name: e.name,
-            path: fullPath,
-            size: stat.size,
-            modified: stat.mtimeMs,
+          try {
+            const fullPath = path.join(dirPath, e.name)
+            const stat = fs.statSync(fullPath)
+            return {
+              name: e.name,
+              path: fullPath,
+              size: stat.size,
+              modified: stat.mtimeMs,
+            }
+          } catch {
+            return null
           }
         })
-        .sort((a, b) => b.modified - a.modified)
-    } catch {
+        .filter(Boolean)
+        .sort((a: any, b: any) => b.modified - a.modified)
+    } catch (err: any) {
+      console.warn(`Cannot read directory "${dirPath}":`, err?.code || err?.message)
       return []
     }
   })

@@ -198,23 +198,27 @@ function extractImagesFromPage(
   return images
 }
 
-/** Embed a single annotation onto a loaded page at inverse scale s. */
-function embedSingleAnnotation(page: any, ann: Annotation, s: number) {
+/** Embed a single annotation onto a loaded page.
+ *  Coordinates are already in PDF points (normalized at creation time). */
+function embedSingleAnnotation(page: any, ann: Annotation) {
+  console.log(`[embedSingle] type=${ann.type}, data=`, JSON.stringify(ann))
   switch (ann.type) {
     case 'highlight': {
+      // MuPDF Highlight: uses Multiply blend mode, no opacity needed
       const a = page.createAnnotation('Highlight')
-      const x = ann.x / s, y = ann.y / s, w = ann.width / s, h = ann.height / s
-      const quad: [number, number, number, number, number, number, number, number] =
-        [x, y, x + w, y, x, y + h, x + w, y + h]
-      a.setQuadPoints([quad])
+      const { x, y, width: w, height: h } = ann
+      // QuadPoints: [ulx,uly, urx,ury, llx,lly, lrx,lry]
+      const quad = [x, y, x + w, y, x, y + h, x + w, y + h]
+      console.log(`[embedSingle] highlight quad=${JSON.stringify(quad)}, color=${ann.color}, rgb=${JSON.stringify(hexToColor(ann.color))}`)
       a.setColor(hexToColor(ann.color))
-      a.setOpacity(ann.opacity ?? 0.4)
+      a.setQuadPoints([quad])
       a.update()
+      console.log(`[embedSingle] highlight created OK`)
       break
     }
     case 'text': {
       const a = page.createAnnotation('FreeText')
-      const x = ann.x / s, y = ann.y / s, fs = ann.fontSize / s
+      const { x, y, fontSize: fs } = ann
       a.setRect([x, y, x + 200, y + fs + 4])
       a.setContents(ann.text)
       a.setDefaultAppearance('Helv', fs, hexToColor(ann.color))
@@ -225,41 +229,41 @@ function embedSingleAnnotation(page: any, ann: Annotation, s: number) {
       const a = page.createAnnotation('Ink')
       const stroke: [number, number][] = []
       for (let i = 0; i < ann.points.length; i += 2) {
-        stroke.push([ann.points[i] / s, ann.points[i + 1] / s])
+        stroke.push([ann.points[i], ann.points[i + 1]])
       }
       a.setInkList([stroke])
       a.setColor(hexToColor(ann.color))
-      a.setBorderWidth(ann.lineWidth / s)
+      a.setBorderWidth(ann.lineWidth)
       a.update()
       break
     }
     case 'rect': {
       const a = page.createAnnotation('Square')
-      const x = ann.x / s, y = ann.y / s, w = ann.width / s, h = ann.height / s
+      const { x, y, width: w, height: h } = ann
       a.setRect([x, y, x + w, y + h])
       a.setColor(hexToColor(ann.color))
-      a.setBorderWidth(ann.lineWidth / s)
+      a.setBorderWidth(ann.lineWidth)
       a.update()
       break
     }
     case 'ellipse': {
       const a = page.createAnnotation('Circle')
-      const cx = ann.x / s, cy = ann.y / s, rx = ann.radiusX / s, ry = ann.radiusY / s
+      const { x: cx, y: cy, radiusX: rx, radiusY: ry } = ann
       a.setRect([cx - rx, cy - ry, cx + rx, cy + ry])
       a.setColor(hexToColor(ann.color))
-      a.setBorderWidth(ann.lineWidth / s)
+      a.setBorderWidth(ann.lineWidth)
       a.update()
       break
     }
     case 'ocrEdit': {
-      const x = ann.x / s, y = ann.y / s, w = ann.width / s, h = ann.height / s
+      const { x, y, width: w, height: h } = ann
       const redact = page.createAnnotation('Redact')
       redact.setRect([x, y, x + w, y + h])
       redact.applyRedaction(true)
       const ft = page.createAnnotation('FreeText')
       ft.setRect([x, y, x + w, y + h])
       ft.setContents(ann.newText)
-      ft.setDefaultAppearance('Helv', ann.fontSize / s, [0, 0, 0])
+      ft.setDefaultAppearance('Helv', ann.fontSize, [0, 0, 0])
       ft.update()
       break
     }
@@ -268,34 +272,34 @@ function embedSingleAnnotation(page: any, ann: Annotation, s: number) {
 
 /**
  * Embed React state annotations into a MuPDF document.
+ * Annotation coordinates are already in PDF points.
  * pageMapping: optional map from annotation page number → actual page index in the doc
  *   (used by saveOrganised where page order differs from original).
  */
 function embedAnnotations(
   doc: any,
   annotations: Record<number, Annotation[]>,
-  scale: number = 1,
   pageMapping?: Record<number, number>,
 ) {
-  const s = scale || 1
-
   for (const [pageStr, anns] of Object.entries(annotations)) {
     const origPage = parseInt(pageStr, 10)
     const pageIdx = pageMapping ? pageMapping[origPage] : origPage - 1
     if (pageIdx === undefined || pageIdx < 0) continue
 
+    console.log(`[embedAnnotations] page ${origPage} → idx ${pageIdx}, ${anns.length} annotations`)
     try {
       withPage(doc, pageIdx, page => {
         for (const ann of anns) {
           try {
-            embedSingleAnnotation(page, ann, s)
+            console.log(`[embedAnnotations] embedding ${ann.type} at (${(ann as any).x}, ${(ann as any).y})`)
+            embedSingleAnnotation(page, ann)
           } catch (e) {
-            console.warn('Failed to embed annotation:', ann.type, e)
+            console.error('Failed to embed annotation:', ann.type, e)
           }
         }
       })
-    } catch {
-      // Page doesn't exist in document — skip silently
+    } catch (e) {
+      console.error(`Failed to load page ${pageIdx}:`, e)
     }
   }
 }
@@ -461,11 +465,10 @@ const api = {
   saveWithAnnotations: (
     tabId: string,
     annotations: Record<number, Annotation[]>,
-    scale: number = 1,
   ): Promise<Uint8Array> =>
     withDoc(tabId, doc => {
       const tmpDoc = snapshotDoc(doc)
-      embedAnnotations(tmpDoc, annotations, scale)
+      embedAnnotations(tmpDoc, annotations)
       return saveAndDestroy(tmpDoc)
     }),
 
@@ -491,7 +494,6 @@ const api = {
     pageOrder: number[],
     rotations: Record<number, number>,
     annotations: Record<number, Annotation[]> = {},
-    scale: number = 1,
   ): Promise<Uint8Array> =>
     withDoc(tabId, srcDoc => {
       const bakedDoc = snapshotDoc(srcDoc)
@@ -519,7 +521,7 @@ const api = {
       for (let i = 0; i < pageOrder.length; i++) {
         pageMapping[pageOrder[i]] = i
       }
-      embedAnnotations(newDoc, annotations, scale, pageMapping)
+      embedAnnotations(newDoc, annotations, pageMapping)
 
       return saveAndDestroy(newDoc)
     }),

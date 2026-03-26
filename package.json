@@ -57,7 +57,10 @@
         "zip"
       ],
       "category": "public.app-category.productivity",
-      "icon": "build/icon.icns"
+      "icon": "build/icon.icns",
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "hardenedRuntime": true
     },
     "dmg": {
       "contents": [

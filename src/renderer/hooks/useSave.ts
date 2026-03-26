@@ -27,9 +27,9 @@ export function useSave(tabId?: string) {
     const orderChanged = tab.pageOrder.length !== defaultOrder.length || tab.pageOrder.some((p: number, i: number) => p !== defaultOrder[i])
     const hasRotations = Object.values(tab.rotations || {}).some((r: number) => r !== 0)
     if (orderChanged || hasRotations) {
-      return mupdf.saveOrganised(tab.id, tab.pageOrder, tab.rotations ?? {}, tab.annotations ?? {}, tab.scale)
+      return mupdf.saveOrganised(tab.id, tab.pageOrder, tab.rotations ?? {}, tab.annotations ?? {})
     }
-    return mupdf.saveWithAnnotations(tab.id, tab.annotations ?? {}, tab.scale)
+    return mupdf.saveWithAnnotations(tab.id, tab.annotations ?? {})
   }, [mupdf])
 
   const save = useCallback(async (forceSaveAs = false, saveAsSuffix?: string) => {

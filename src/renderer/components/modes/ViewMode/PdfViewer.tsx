@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useApp } from '../../../context/AppContext'
 import { useMupdf } from '../../../hooks/useMupdf'
 import { renderBitmapToCanvas } from '../../../utils/canvas'
@@ -13,7 +13,6 @@ export default function PdfViewer() {
   const fittedRef = useRef<string | null>(null)
   const scrollCooldownRef = useRef(false)
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [isRendering, setIsRendering] = useState(false)
   const mountedRef = useRef(true)
   const activeTabRef = useRef(activeTab)
   const lastLayoutRef = useRef<string | undefined>(undefined)
@@ -138,7 +137,6 @@ export default function PdfViewer() {
   const render = useCallback(async () => {
     if (!activeTab || !canvasRef.current || renderingRef.current) return
     renderingRef.current = true
-    setIsRendering(true)
     try {
       const dpr = window.devicePixelRatio || 1
       const isTwoPage = activeTab.viewLayout === 'two-page'
@@ -181,7 +179,6 @@ export default function PdfViewer() {
       console.error('Render error', e)
     } finally {
       renderingRef.current = false
-      if (mountedRef.current) setIsRendering(false)
     }
   }, [activeTab, mupdf])
 
@@ -202,6 +199,17 @@ export default function PdfViewer() {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement).tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
+
+      // Cmd/Ctrl+Z: undo annotation
+      if (e.key === 'z' && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+        const tab = activeTabRef.current
+        if (tab?.editMode) {
+          e.preventDefault()
+          dispatch({ type: 'UNDO_ANNOTATION', payload: { tabId: tab.id, page: tab.currentPage } })
+          return
+        }
+      }
+
       switch (e.key) {
         case 'ArrowRight': case 'ArrowDown': case 'PageDown':
           dispatch({ type: 'SET_PAGE', payload: { tabId, page: snapOdd(Math.min(currentPage + step, numPages)) } })
@@ -223,7 +231,7 @@ export default function PdfViewer() {
     return () => window.removeEventListener('keydown', onKey)
   }, [activeTab, dispatch])
 
-  // Scroll wheel navigation
+  // Scroll wheel navigation — navigate pages when content fits or at scroll boundaries
   useEffect(() => {
     if (!activeTab) return
 
@@ -235,6 +243,19 @@ export default function PdfViewer() {
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       if (scrollCooldownRef.current) return
       if (Math.abs(e.deltaY) < 30) return
+
+      // Check if the scroll container has overflow (zoomed in)
+      const scrollParent = containerRef.current?.closest('.overflow-auto') as HTMLElement | null
+      if (scrollParent) {
+        const hasOverflowY = scrollParent.scrollHeight > scrollParent.clientHeight + 2
+        if (hasOverflowY) {
+          // Allow native scroll; only navigate at boundaries
+          const atTop = scrollParent.scrollTop <= 1
+          const atBottom = scrollParent.scrollTop + scrollParent.clientHeight >= scrollParent.scrollHeight - 1
+          if (e.deltaY > 0 && !atBottom) return
+          if (e.deltaY < 0 && !atTop) return
+        }
+      }
 
       e.preventDefault()
       scrollCooldownRef.current = true
@@ -274,17 +295,6 @@ export default function PdfViewer() {
   const isTwoPage = activeTab?.viewLayout === 'two-page'
   const hasNextPage = activeTab ? activeTab.currentPage + 1 <= activeTab.numPages : false
 
-  const renderingOverlay = isRendering && (
-    <div className="absolute inset-0 flex items-center justify-center rendering-overlay">
-      <div className="flex flex-col items-center gap-3 px-5 py-4 rendering-panel">
-        <svg className="spinner-md" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="20" fill="none" stroke="var(--md-primary-40)" strokeWidth="4" strokeLinecap="round" />
-        </svg>
-        <span className="text-label-medium text-on-surface-variant">Rendering page…</span>
-      </div>
-    </div>
-  )
-
   if (isTwoPage) {
     return (
       <div ref={containerRef} className="relative flex items-start justify-center gap-4">
@@ -297,7 +307,6 @@ export default function PdfViewer() {
           </div>
         )}
         {!hasNextPage && <canvas ref={canvas2Ref} className="hidden" />}
-        {renderingOverlay}
       </div>
     )
   }
@@ -306,7 +315,6 @@ export default function PdfViewer() {
     <div ref={containerRef} className="relative">
       <canvas ref={canvasRef} className="block" />
       <canvas ref={canvas2Ref} className="hidden" />
-      {renderingOverlay}
     </div>
   )
 }
