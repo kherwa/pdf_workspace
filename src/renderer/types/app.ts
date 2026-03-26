@@ -3,6 +3,7 @@ import type { CompressionSettings } from './compress'
 
 export type AppMode = 'view' | 'organise' | 'merge' | 'compress' | 'redact'
 export type ViewLayout = 'single' | 'two-page'
+export type FitMode = 'page' | 'height' | 'width' | 'none'
 export type DrawerView = 'home' | 'all' | 'edit' | 'convert'
 export type HomeSection = 'recent' | 'computer'
 export type ComputerFolder = 'desktop' | 'downloads' | 'documents' | null
@@ -24,6 +25,7 @@ export interface Tab {
   activeColor: string
   isLoading: boolean
   viewLayout: ViewLayout
+  fitMode: FitMode                 // remembered fit mode for auto-refit on resize
   dirty: boolean                   // true if any unsaved changes exist
 }
 
@@ -55,6 +57,7 @@ export type Action =
   | { type: 'SET_MODE';           payload: { mode: AppMode } }
   | { type: 'SET_PAGE';           payload: { tabId: string; page: number } }
   | { type: 'SET_SCALE';          payload: { tabId: string; scale: number } }
+  | { type: 'SET_FIT_MODE';       payload: { tabId: string; fitMode: FitMode } }
   | { type: 'SET_EDIT_MODE';      payload: { tabId: string; editMode: boolean } }
   | { type: 'SET_ACTIVE_TOOL';    payload: { tabId: string; tool: ToolName | null } }
   | { type: 'SET_COLOR';          payload: { tabId: string; color: string } }

@@ -21,6 +21,7 @@ export function makeTab(overrides: Partial<Tab> & Pick<Tab, 'id' | 'fileName' | 
     activeColor: '#FFFF00',
     isLoading: false,
     viewLayout: 'single',
+    fitMode: 'page',
     dirty: false,
     ...overrides,
   }

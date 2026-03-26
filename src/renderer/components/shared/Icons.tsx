@@ -27,7 +27,7 @@ function icon(d: string | string[], fill?: boolean) {
 }
 
 // Navigation
-export const HomeIcon = icon(['M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M9 22V12h6v10'])
+export const HomeIcon = icon(['M3 10.5L12 3l9 7.5', 'M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5', 'M9 21v-7h6v7'])
 export const MenuIcon = icon(['M3 12h18', 'M3 6h18', 'M3 18h18'])
 export const ClockIcon = icon(['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M12 6v6l4 2'])
 export const MonitorIcon = icon(['M2 3h20v14H2z', 'M8 21h8', 'M12 17v4'])
@@ -131,8 +131,8 @@ export function GridIcon({ size = 24, className }: IconProps) {
   )
 }
 
-export const MergeIcon = icon(['M8 6h13', 'M8 12h13', 'M8 18h13', 'M3 6h.01', 'M3 12h.01', 'M3 18h.01'])
-export const CompressIcon = icon(['M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242', 'M12 12v9', 'M8 17l4-5 4 5'])
+export const MergeIcon = icon(['M4 4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4z', 'M10 7h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z'])
+export const CompressIcon = icon(['M4 12h16', 'M12 3v5', 'M9 5l3 3 3-3', 'M12 21v-5', 'M9 19l3-3 3 3'])
 
 export function ShieldIcon({ size = 24, className }: IconProps) {
   return (

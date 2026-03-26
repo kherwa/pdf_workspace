@@ -6,7 +6,7 @@ import {
   ChevronUpIcon, ChevronDownIcon, ZoomInIcon, ZoomOutIcon,
   RotateCWIcon, ViewOptionsIcon, FitWidthIcon, FitHeightIcon, TwoPageIcon,
 } from '../shared/Icons'
-import type { ViewLayout } from '../../types/app'
+import type { ViewLayout, FitMode } from '../../types/app'
 
 export default function StatusBar() {
   const { activeTab, dispatch } = useApp()
@@ -47,6 +47,10 @@ export default function StatusBar() {
     return { width: swapped ? info.height : info.width, height: swapped ? info.width : info.height }
   }
 
+  function setFitMode(mode: FitMode) {
+    dispatch({ type: 'SET_FIT_MODE', payload: { tabId, fitMode: mode } })
+  }
+
   async function fitPage() {
     try {
       const info = await mupdf.getPageInfo(tabId, currentPage)
@@ -78,6 +82,7 @@ export default function StatusBar() {
         setScale(Math.round(Math.min(fitScaleW, fitScaleH) * 100) / 100)
       }
     } catch {}
+    setFitMode('page')
     setShowViewMenu(false)
   }
 
@@ -92,6 +97,7 @@ export default function StatusBar() {
       const fitScale = (main.clientHeight - padding) / dims.height
       setScale(Math.round(fitScale * 100) / 100)
     } catch {}
+    setFitMode('height')
     setShowViewMenu(false)
   }
 
@@ -120,6 +126,7 @@ export default function StatusBar() {
         setScale(Math.round(fitScale * 100) / 100)
       }
     } catch {}
+    setFitMode('width')
     setShowViewMenu(false)
   }
 
@@ -253,10 +260,10 @@ export default function StatusBar() {
 
       {/* Zoom controls */}
       <div className="flex flex-col items-center gap-1">
-        <button onClick={() => setScale(scale + 0.1)} className="btn-icon-sm" aria-label="Zoom in">
+        <button onClick={() => { setScale(scale + 0.1); setFitMode('none') }} className="btn-icon-sm" aria-label="Zoom in">
           <ZoomInIcon size={18} />
         </button>
-        <button onClick={() => setScale(scale - 0.1)} className="btn-icon-sm" aria-label="Zoom out">
+        <button onClick={() => { setScale(scale - 0.1); setFitMode('none') }} className="btn-icon-sm" aria-label="Zoom out">
           <ZoomOutIcon size={18} />
         </button>
       </div>

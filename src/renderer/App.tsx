@@ -29,7 +29,7 @@ export default function App() {
       <MenuBar />
 
       {/* Top action bar — only when a file is open */}
-      {activeTab && <TopBar />}
+      {activeTab && mode !== 'merge' && <TopBar />}
 
       {/* Body: navigation drawer + content */}
       <div className={`flex flex-1 overflow-hidden ${!activeTab ? 'border-top-outline' : ''}`}>
@@ -66,7 +66,7 @@ export default function App() {
                 </>
               )}
             </main>
-            {activeTab && <StatusBar />}
+            {activeTab && mode !== 'merge' && <StatusBar />}
           </div>
         </div>
       </div>

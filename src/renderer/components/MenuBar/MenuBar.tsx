@@ -237,31 +237,61 @@ export default function MenuBar() {
         aria-label="Home"
         title="Home"
       >
-        <HomeIcon size={20} />
+        <HomeIcon size={18} />
       </button>
 
-      <div className="divider-v" />
+      {state.tabs.length > 0 && <div className="divider-v" />}
 
-      {/* Create split button */}
-      <div className="relative flex titlebar-no-drag" ref={createMenuRef}>
+      {/* File tabs */}
+      {state.tabs.length > 0 && (
+        <div className="flex items-center overflow-x-auto min-w-0 shrink gap-0.5 titlebar-no-drag">
+          {state.tabs.map(tab => {
+            const isActive = tab.id === state.activeTabId
+            return (
+              <button
+                key={tab.id}
+                onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: tab.id } })}
+                className={`group tab-item max-w-[200px] ${isActive ? 'active' : ''}`}
+                aria-label={`Tab: ${tab.fileName}`}
+              >
+                <span className="truncate flex-1 text-left">
+                  {tab.fileName}
+                </span>
+                {tab.isLoading && <span className="spinner-sm" />}
+                <span
+                  role="button"
+                  onClick={e => handleCloseTab(tab.id, e)}
+                  className="shrink-0 w-5 h-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity tab-close-bg"
+                  aria-label={`Close ${tab.fileName}`}
+                >
+                  <XIcon size={12} />
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Create split button — adjacent to tabs */}
+      <div className="relative flex shrink-0 titlebar-no-drag ml-1" ref={createMenuRef}>
         <button
           onClick={handleCreate}
-          className="btn-toggle split-left"
+          className="btn-create"
           aria-label="Create PDF from file"
-          title="Create PDF from image, document, or text file"
+          title="Create PDF"
         >
-          <PlusIcon size={18} />
-          Create
+          <PlusIcon size={14} />
+          <span>Create</span>
         </button>
         <button
           onClick={() => setShowCreateMenu(!showCreateMenu)}
-          className="btn-toggle split-right"
+          className="btn-create-caret"
           aria-label="More create options"
         >
-          <ChevronDownIcon size={14} />
+          <ChevronDownIcon size={12} />
         </button>
         {showCreateMenu && (
-          <div className="dropdown min-w-[200px]">
+          <div className="dropdown dropdown-below min-w-[200px]">
             <button onClick={handleCreate} className="dropdown-item">
               <FileIcon size={16} />
               <span className="text-label-large">Create PDF from File</span>
@@ -275,43 +305,8 @@ export default function MenuBar() {
         )}
       </div>
 
-      <div className="divider-v" />
-
-      {/* File tabs */}
-      <div className="flex items-center overflow-x-auto min-w-0 flex-1 gap-0.5 titlebar-no-drag">
-        {state.tabs.map(tab => {
-          const isActive = tab.id === state.activeTabId
-          return (
-            <button
-              key={tab.id}
-              onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: tab.id } })}
-              className={`group tab-item max-w-[200px] ${isActive ? 'active' : ''}`}
-              aria-label={`Tab: ${tab.fileName}`}
-            >
-              <span className="truncate flex-1 text-left">
-                {tab.fileName}
-              </span>
-              {tab.isLoading && <span className="spinner-sm" />}
-              <span
-                role="button"
-                onClick={e => handleCloseTab(tab.id, e)}
-                className="shrink-0 w-6 h-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity tab-close-bg"
-                aria-label={`Close ${tab.fileName}`}
-              >
-                <XIcon size={14} />
-              </span>
-              {isActive && <span className="tab-indicator" />}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* App title — fallback when no tabs */}
-      {state.tabs.length === 0 && (
-        <span className="text-title-small text-on-surface-muted">
-          PDF Workspace
-        </span>
-      )}
+      {/* Spacer — fills remaining titlebar for drag region */}
+      <div className="flex-1" />
     </div>
   )
 }

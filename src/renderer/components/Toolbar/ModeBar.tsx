@@ -1,9 +1,10 @@
 import { useApp } from '../../context/AppContext'
 import { useTheme } from '../../hooks/useTheme'
+import { makeTab } from '../../hooks/useFileSystem'
 import type { AppMode, ComputerFolder } from '../../types/app'
 import {
   PenIcon, GridIcon, ShieldIcon,
-  CompressIcon,
+  CompressIcon, MergeIcon,
   ClockIcon, MonitorIcon, FolderIcon, DownloadIcon,
   SunIcon, MoonIcon, XIcon,
 } from '../shared/Icons'
@@ -17,6 +18,7 @@ const EDIT_ACTIONS: ActionItem[] = [
 ]
 
 const CONVERT_ACTIONS: ActionItem[] = [
+  { id: 'merge', label: 'Merge', Icon: MergeIcon },
   { id: 'compress', label: 'Compress', Icon: CompressIcon },
 ]
 
@@ -62,6 +64,20 @@ export default function ModeBar() {
     const view = EDIT_IDS.includes(id) ? 'edit' : CONVERT_IDS.includes(id) ? 'convert' : drawerView
     dispatch({ type: 'SET_DRAWER_VIEW', payload: { view } })
 
+    if (id === 'merge') {
+      // Create or activate the "New Document" tab for merge
+      const existing = state.tabs.find(t => t.fileName === 'New Document')
+      if (!existing) {
+        const tabId = crypto.randomUUID()
+        dispatch({ type: 'OPEN_TAB', payload: makeTab({ id: tabId, fileName: 'New Document', numPages: 0 }) })
+      } else {
+        dispatch({ type: 'SET_ACTIVE_TAB', payload: { tabId: existing.id } })
+      }
+      dispatch({ type: 'SET_MODE', payload: { mode: 'merge' } })
+      if (!collapsed) dispatch({ type: 'TOGGLE_DRAWER' })
+      return
+    }
+
     if (id === 'annotate') {
       if (!activeTab) return
       if (isItemActive('annotate')) {
@@ -104,8 +120,8 @@ export default function ModeBar() {
     )
   }
 
-  /* ── Collapsed: hide drawer entirely ─────────────────────────────────── */
-  if (collapsed) return null
+  /* ── Collapsed or merge mode: hide drawer entirely ──────────────────── */
+  if (collapsed || mode === 'merge') return null
 
   const title = isHome ? 'Home' : drawerView === 'edit' ? 'Edit Tools' : drawerView === 'convert' ? 'Convert Tools' : 'All Tools'
 

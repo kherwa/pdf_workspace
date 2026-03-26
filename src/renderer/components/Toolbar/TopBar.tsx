@@ -54,14 +54,16 @@ export default function TopBar() {
     }
   }
 
+  const isMerge = mode === 'merge'
+
   return (
     <div className="toolbar justify-between border-top-outline">
       {/* Left: action buttons */}
       <div className="flex items-center gap-1">
         {([
-          { label: 'All Tools', active: false, onClick: handleAllToolsClick, disabled: false },
-          { label: 'Edit', active: !state.drawerCollapsed && isEditActive, onClick: handleEditClick, disabled: !activeTab },
-          { label: 'Convert', active: !state.drawerCollapsed && isConvertActive, onClick: handleConvertClick, disabled: !activeTab },
+          { label: 'All Tools', active: false, onClick: handleAllToolsClick, disabled: isMerge },
+          { label: 'Edit', active: !state.drawerCollapsed && isEditActive, onClick: handleEditClick, disabled: !activeTab || isMerge },
+          { label: 'Convert', active: !state.drawerCollapsed && isConvertActive, onClick: handleConvertClick, disabled: !activeTab || isMerge },
         ] as const).map(({ label, active, onClick, disabled }) => (
           <button
             key={label}

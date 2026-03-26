@@ -27,6 +27,7 @@ export default function PdfViewer() {
   const tabId = activeTab?.id
   const currentPage = activeTab?.currentPage
   const viewLayout = activeTab?.viewLayout
+  const fitMode = activeTab?.fitMode ?? 'page'
   const rotations = activeTab?.rotations
 
   /** Get effective page dimensions accounting for user-applied rotation */
@@ -41,7 +42,9 @@ export default function PdfViewer() {
     }
   }, [mupdf])
 
-  const calcFitScale = useCallback(async () => {
+  const calcFitScale = useCallback(async (mode?: string) => {
+    const effectiveMode = mode ?? fitMode ?? 'page'
+    if (effectiveMode === 'none') return null
     if (!tabId || !currentPage || !rotations) return null
     try {
       const userRot = rotations[currentPage] ?? 0
@@ -52,19 +55,35 @@ export default function PdfViewer() {
       const padding = 48
       const isTwoPage = viewLayout === 'two-page'
 
+      // Get two-page dimensions if needed
+      let pageW = dims.width
+      let pageH = dims.height
       if (isTwoPage) {
-        // Also check second page dimensions
         const nextPage = currentPage + 1
-        let pageW = dims.width
-        let pageH = dims.height
         if (nextPage <= (activeTabRef.current?.numPages ?? 0)) {
           const userRot2 = rotations[nextPage] ?? 0
           const dims2 = await getEffectiveDims(tabId, nextPage, userRot2)
-          // Use the larger width and taller height to ensure both pages fit
           pageW = Math.max(dims.width, dims2.width)
           pageH = Math.max(dims.height, dims2.height)
         }
-        const gap = 16
+      }
+
+      const gap = 16
+
+      if (effectiveMode === 'width') {
+        const fitScale = isTwoPage
+          ? (clientWidth - padding - gap) / (pageW * 2)
+          : (clientWidth - padding) / dims.width
+        return Math.round(fitScale * 100) / 100
+      }
+
+      if (effectiveMode === 'height') {
+        const fitScale = (clientHeight - padding) / (isTwoPage ? pageH : dims.height)
+        return Math.round(fitScale * 100) / 100
+      }
+
+      // 'page' mode — fit both dimensions
+      if (isTwoPage) {
         const availW = clientWidth - padding - gap
         const fitScaleW = availW / (pageW * 2)
         const fitScaleH = (clientHeight - padding) / pageH
@@ -79,7 +98,7 @@ export default function PdfViewer() {
     } catch {
       return null
     }
-  }, [tabId, currentPage, viewLayout, rotations, getEffectiveDims])
+  }, [tabId, currentPage, viewLayout, fitMode, rotations, getEffectiveDims])
 
   /** Auto fit-to-page when file first opens */
   useEffect(() => {
@@ -122,9 +141,12 @@ export default function PdfViewer() {
     let firstCall = true
     const observer = new ResizeObserver(() => {
       if (firstCall) { firstCall = false; return }
+      // Skip auto-refit when user has manually zoomed
+      const currentFitMode = activeTabRef.current?.fitMode ?? 'page'
+      if (currentFitMode === 'none') return
       clearTimeout(resizeTimer)
       resizeTimer = setTimeout(async () => {
-        const fitScale = await calcFitScale()
+        const fitScale = await calcFitScale(currentFitMode)
         if (fitScale && fitScale > 0.1 && activeTab && mountedRef.current) {
           dispatch({ type: 'SET_SCALE', payload: { tabId: activeTab.id, scale: Math.max(0.1, Math.min(5, fitScale)) } })
         }
@@ -222,9 +244,13 @@ export default function PdfViewer() {
         case 'End':
           dispatch({ type: 'SET_PAGE', payload: { tabId, page: snapOdd(numPages) } }); break
         case '+': case '=':
-          dispatch({ type: 'SET_SCALE', payload: { tabId, scale: Math.min(scale + 0.1, 5) } }); break
+          dispatch({ type: 'SET_SCALE', payload: { tabId, scale: Math.min(scale + 0.1, 5) } })
+          dispatch({ type: 'SET_FIT_MODE', payload: { tabId, fitMode: 'none' } })
+          break
         case '-':
-          dispatch({ type: 'SET_SCALE', payload: { tabId, scale: Math.max(scale - 0.1, 0.1) } }); break
+          dispatch({ type: 'SET_SCALE', payload: { tabId, scale: Math.max(scale - 0.1, 0.1) } })
+          dispatch({ type: 'SET_FIT_MODE', payload: { tabId, fitMode: 'none' } })
+          break
       }
     }
     window.addEventListener('keydown', onKey)

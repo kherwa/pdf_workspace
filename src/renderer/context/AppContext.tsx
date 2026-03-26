@@ -73,6 +73,16 @@ export function reducer(state: AppState, action: Action): AppState {
         ),
       }
 
+    case 'SET_FIT_MODE':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.payload.tabId
+            ? { ...t, fitMode: action.payload.fitMode }
+            : t
+        ),
+      }
+
     case 'SET_EDIT_MODE':
       return {
         ...state,

@@ -687,6 +687,7 @@
   }
   /* Dropdown variants */
   .dropdown-left {
+    left: auto;
     right: 100%;
     top: 50%;
     transform: translateY(-50%);
@@ -773,8 +774,8 @@
   .border-error { border-color: var(--md-error-40); }
 
   /* Status bar */
-  .statusbar-aside { width: 64px; background-color: var(--md-surface); border-left: 1px solid var(--md-outline-20); }
-  .status-input { width: 44px; height: 32px; background-color: var(--md-surface-container); border: 1px solid var(--md-outline-30); color: var(--md-on-surface); font-size: 12px; }
+  .statusbar-aside { width: 48px; background-color: var(--md-surface); border-left: 1px solid var(--md-outline-20); }
+  .status-input { width: 36px; height: 28px; background-color: var(--md-surface-container); border: 1px solid var(--md-outline-30); color: var(--md-on-surface); font-size: 11px; }
   .status-input.focused { border-color: var(--md-primary-40); }
   .text-xs-muted { font-size: 10px; color: var(--md-on-surface-muted); line-height: 1; }
   .status-divider { width: 24px; height: 1px; background-color: var(--md-outline-20); }
@@ -874,31 +875,71 @@
   .tab-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    height: var(--md-titlebar-h);
-    padding: 0 14px;
+    gap: 6px;
+    height: 30px;
+    padding: 0 10px;
     position: relative;
     white-space: nowrap;
     font-family: var(--md-font-family);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    letter-spacing: 0.25px;
+    letter-spacing: 0.2px;
     color: var(--md-on-surface-variant);
-    transition: color var(--md-duration-short) var(--md-easing-standard);
+    border-radius: var(--md-radius-sm);
+    transition: color var(--md-duration-short) var(--md-easing-standard),
+                background-color var(--md-duration-short) var(--md-easing-standard);
+  }
+  .tab-item:hover {
+    background-color: var(--md-outline-08);
   }
   .tab-item.active {
     font-weight: 500;
     letter-spacing: 0.1px;
-    color: var(--md-primary-40);
+    color: var(--md-on-surface);
+    background-color: var(--md-surface-container);
   }
-  .tab-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 8px;
-    right: 8px;
-    height: 3px;
-    border-radius: 3px 3px 0 0;
-    background-color: var(--md-primary-40);
+
+  /* Compact create button */
+  .btn-create {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: var(--md-radius-sm) 0 0 var(--md-radius-sm);
+    color: var(--md-on-surface-variant);
+    border: 1px solid var(--md-outline-20);
+    border-right: none;
+    background-color: var(--md-surface);
+    font-family: var(--md-font-family);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color var(--md-duration-short) var(--md-easing-standard);
+  }
+  .btn-create:hover { background-color: var(--md-outline-08); }
+  .btn-create-caret {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 28px;
+    border-radius: 0 var(--md-radius-sm) var(--md-radius-sm) 0;
+    border: 1px solid var(--md-outline-20);
+    border-left: 1px solid var(--md-outline-20);
+    color: var(--md-on-surface-variant);
+    background-color: var(--md-surface);
+    transition: background-color var(--md-duration-short) var(--md-easing-standard);
+  }
+  .btn-create-caret:hover { background-color: var(--md-outline-08); }
+
+  /* Dropdown positioned from right edge */
+  .dropdown-right {
+    left: auto;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
   }
 
   /* ── Active indicator (navigation rail top bar) ───────────────────────── */
