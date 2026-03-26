@@ -204,13 +204,13 @@ function embedSingleAnnotation(page: any, ann: Annotation) {
   console.log(`[embedSingle] type=${ann.type}, data=`, JSON.stringify(ann))
   switch (ann.type) {
     case 'highlight': {
-      // MuPDF Highlight: uses Multiply blend mode, no opacity needed
       const a = page.createAnnotation('Highlight')
       const { x, y, width: w, height: h } = ann
       // QuadPoints: [ulx,uly, urx,ury, llx,lly, lrx,lry]
       const quad = [x, y, x + w, y, x, y + h, x + w, y + h]
       console.log(`[embedSingle] highlight quad=${JSON.stringify(quad)}, color=${ann.color}, rgb=${JSON.stringify(hexToColor(ann.color))}`)
       a.setColor(hexToColor(ann.color))
+      //a.setOpacity(ann.opacity ?? 0.4)
       a.setQuadPoints([quad])
       a.update()
       console.log(`[embedSingle] highlight created OK`)

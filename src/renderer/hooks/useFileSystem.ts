@@ -18,7 +18,7 @@ export function makeTab(overrides: Partial<Tab> & Pick<Tab, 'id' | 'fileName' | 
     redactions: {},
     editMode: false,
     activeTool: null,
-    activeColor: '#f59e0b',
+    activeColor: '#FFFF00',
     isLoading: false,
     viewLayout: 'single',
     dirty: false,

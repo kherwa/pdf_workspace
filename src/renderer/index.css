@@ -759,6 +759,17 @@
   }
   .disabled-opacity { opacity: 0.38; }
   .tool-active { background-color: var(--md-secondary-container); color: var(--md-secondary-40); border-color: var(--md-secondary-40); }
+  .color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--md-outline-30);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color var(--md-duration-short) var(--md-easing-standard);
+  }
+  .color-swatch:hover { border-color: var(--md-on-surface); }
+  .color-swatch-active { border-color: var(--md-primary-40); box-shadow: 0 0 0 1.5px var(--md-primary-40); }
   .border-error { border-color: var(--md-error-40); }
 
   /* Status bar */
