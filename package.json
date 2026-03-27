@@ -1,6 +1,6 @@
 {
   "name": "electron-pdf-workspace",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "PDF workspace built with Electron, React, MuPDF",
   "type": "module",
   "main": "dist/main.cjs",
