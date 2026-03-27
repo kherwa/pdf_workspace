@@ -22,7 +22,7 @@ function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 768,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#161616' : '#ffffff',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0D0D0D' : '#E8E8E8',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -35,7 +35,7 @@ function createWindow() {
     ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 14 } } : {}),
     ...(process.platform === 'win32' ? {
       titleBarOverlay: {
-        color: nativeTheme.shouldUseDarkColors ? '#161616' : '#ffffff',
+        color: nativeTheme.shouldUseDarkColors ? '#0D0D0D' : '#E8E8E8',
         symbolColor: nativeTheme.shouldUseDarkColors ? '#e6e6e6' : '#222222',
         height: 40,
       },

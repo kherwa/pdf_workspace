@@ -55,6 +55,9 @@
   --md-surface-container: var(--md-neutral-12);
   --md-surface-container-low: var(--md-neutral-10);
   --md-surface-container-high: var(--md-neutral-17);
+  --md-titlebar-bg: #0D0D0D;
+  --md-chrome-bg: var(--md-surface-container-high);
+  --md-canvas-bg: var(--md-surface);
 
   /* On-surface */
   --md-on-surface: var(--md-neutral-90);
@@ -119,6 +122,9 @@
   --md-surface-container: var(--md-neutral-12);
   --md-surface-container-low: var(--md-neutral-10);
   --md-surface-container-high: var(--md-neutral-17);
+  --md-titlebar-bg: #E8E8E8;
+  --md-chrome-bg: var(--md-surface);
+  --md-canvas-bg: var(--md-titlebar-bg);
 
   --md-on-surface: var(--md-neutral-90);
   --md-on-surface-variant: var(--md-neutral-80);
@@ -220,7 +226,7 @@
 /* ── Semantic utility classes ──────────────────────────────────────────── */
 @layer utilities {
   /* Backgrounds */
-  .bg-surface            { background-color: var(--md-surface); }
+  .bg-surface            { background-color: var(--md-canvas-bg); }
   .bg-surface-dim        { background-color: var(--md-surface-dim); }
   .bg-surface-bright     { background-color: var(--md-surface-bright); }
   .bg-surface-container  { background-color: var(--md-surface-container); }
@@ -521,7 +527,7 @@
     align-items: center;
     flex-shrink: 0;
     height: var(--md-titlebar-h);
-    background-color: var(--md-surface);
+    background-color: var(--md-titlebar-bg);
     -webkit-app-region: drag;
   }
   .titlebar-no-drag { -webkit-app-region: no-drag; }
@@ -533,7 +539,7 @@
     height: var(--md-toolbar-h);
     padding: 0 16px;
     gap: 8px;
-    background-color: var(--md-surface);
+    background-color: var(--md-chrome-bg);
     border-bottom: 1px solid var(--md-outline-30);
   }
 
@@ -780,7 +786,7 @@
   .border-error { border-color: var(--md-error-40); }
 
   /* Status bar */
-  .statusbar-aside { width: 48px; background-color: var(--md-surface); border-left: 1px solid var(--md-outline-20); }
+  .statusbar-aside { width: 48px; background-color: var(--md-chrome-bg); border-left: 1px solid var(--md-outline-20); }
   .status-input { width: 36px; height: 28px; background-color: var(--md-surface-container); border: 1px solid var(--md-outline-30); color: var(--md-on-surface); font-size: 11px; }
   .status-input.focused { border-color: var(--md-primary-40); }
   .text-xs-muted { font-size: 10px; color: var(--md-on-surface-muted); line-height: 1; }
@@ -826,7 +832,7 @@
     flex-shrink: 0;
     overflow: hidden;
     width: 260px;
-    background-color: var(--md-surface);
+    background-color: var(--md-chrome-bg);
     border-right: 1px solid var(--md-outline-20);
     box-shadow: var(--md-elevation-1);
     transition: width var(--md-duration-medium) var(--md-easing-standard);
@@ -902,7 +908,9 @@
     font-weight: 500;
     letter-spacing: 0.1px;
     color: var(--md-on-surface);
-    background-color: var(--md-surface-container);
+    background-color: var(--md-chrome-bg);
+    height: var(--md-titlebar-h);
+    border-radius: 0;
   }
 
   /* Compact create button */

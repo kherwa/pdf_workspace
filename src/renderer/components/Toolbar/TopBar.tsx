@@ -53,7 +53,7 @@ export default function TopBar() {
   const isMerge = mode === 'merge'
 
   return (
-    <div className="toolbar justify-between border-top-outline">
+    <div className="toolbar justify-between">
       {/* Left: action buttons */}
       <div className="flex items-center gap-1">
         {([

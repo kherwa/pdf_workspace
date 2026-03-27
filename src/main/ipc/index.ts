@@ -3,8 +3,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const OVERLAY_COLORS = {
-  dark:  { color: '#161616', symbolColor: '#e6e6e6' },
-  light: { color: '#ffffff', symbolColor: '#222222' },
+  dark:  { color: '#0D0D0D', symbolColor: '#e6e6e6' },
+  light: { color: '#E8E8E8', symbolColor: '#222222' },
 }
 
 let registered = false
