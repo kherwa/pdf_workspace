@@ -697,7 +697,7 @@
   .dropdown-item.active { color: var(--md-primary-40); }
 
   /* Menu / titlebar helpers */
-  .platform-mac { padding-left: 78px; padding-right: 8px; }
+  .platform-mac { padding-left: 92px; padding-right: 8px; }
   .platform-linux { padding-left: 8px; padding-right: 8px; }
   .platform-win { padding-left: 8px; padding-right: 140px; }
   .menu-active { color: var(--md-on-surface); background-color: var(--md-outline-08); }
@@ -771,6 +771,12 @@
   }
   .color-swatch:hover { border-color: var(--md-on-surface); }
   .color-swatch-active { border-color: var(--md-primary-40); box-shadow: 0 0 0 1.5px var(--md-primary-40); }
+  .annotation-colors-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 24px 8px 48px;
+  }
   .border-error { border-color: var(--md-error-40); }
 
   /* Status bar */

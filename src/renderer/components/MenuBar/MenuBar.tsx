@@ -6,7 +6,7 @@ import { useMupdf } from '../../hooks/useMupdf'
 import { useRecentFiles } from '../../hooks/useRecentFiles'
 import { useClickOutside } from '../../hooks/useClickOutside'
 import { createPageOrder } from '../../utils/array'
-import { MenuIcon, HomeIcon, XIcon, PlusIcon, MergeIcon, ChevronDownIcon, FileIcon } from '../shared/Icons'
+import { MenuIcon, HomeIcon, XIcon, PlusIcon, MergeIcon, ChevronDownIcon, FileIcon, FolderOpenIcon } from '../shared/Icons'
 
 const api = (window as any).electronAPI
 const platform: string = api?.platform ?? 'win32'
@@ -292,6 +292,11 @@ export default function MenuBar() {
         </button>
         {showCreateMenu && (
           <div className="dropdown dropdown-below min-w-[200px]">
+            <button onClick={() => { setShowCreateMenu(false); api.triggerMenuOpen() }} className="dropdown-item">
+              <FolderOpenIcon size={16} />
+              <span className="text-label-large">Open File</span>
+            </button>
+            <div className="divider-h" />
             <button onClick={handleCreate} className="dropdown-item">
               <FileIcon size={16} />
               <span className="text-label-large">Create PDF from File</span>

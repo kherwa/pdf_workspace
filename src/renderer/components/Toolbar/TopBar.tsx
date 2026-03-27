@@ -1,12 +1,8 @@
 import { useApp } from '../../context/AppContext'
-import { SaveIcon } from '../shared/Icons'
-
-const api = (window as any).electronAPI
-const isMac = api?.platform === 'darwin'
 
 export default function TopBar() {
   const { state, activeTab, dispatch } = useApp()
-  const { mode, drawerView } = state
+  const { mode } = state
 
   const isEditActive = ['organise', 'redact'].includes(mode) || (mode === 'view' && !!activeTab?.editMode)
   const isConvertActive = ['merge', 'compress'].includes(mode)

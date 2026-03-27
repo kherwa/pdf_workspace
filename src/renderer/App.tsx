@@ -4,11 +4,8 @@ import MenuBar from './components/MenuBar/MenuBar'
 import ModeBar from './components/Toolbar/ModeBar'
 import TopBar from './components/Toolbar/TopBar'
 import StatusBar from './components/StatusBar/StatusBar'
-import EditBar from './components/Toolbar/EditBar'
-import OrganiseToolbar from './components/Toolbar/OrganiseToolbar'
 import MergeToolbar from './components/Toolbar/MergeToolbar'
 import CompressToolbar from './components/Toolbar/CompressToolbar'
-import RedactToolbar from './components/Toolbar/RedactToolbar'
 import ViewMode from './components/modes/ViewMode/ViewMode'
 import OrganiseMode from './components/modes/OrganiseMode/OrganiseMode'
 import MergeMode from './components/modes/MergeMode/MergeMode'
@@ -41,11 +38,8 @@ export default function App() {
           {/* Context toolbar — changes per mode (only when file open) */}
           {activeTab && (
             <>
-              {(mode === 'view' && activeTab.editMode) && <EditBar />}
-              {mode === 'organise'  && <OrganiseToolbar />}
               {mode === 'merge'     && <MergeToolbar />}
               {mode === 'compress'  && <CompressToolbar />}
-              {mode === 'redact'    && <RedactToolbar />}
             </>
           )}
 

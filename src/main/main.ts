@@ -32,6 +32,7 @@ function createWindow() {
     // Linux: use default frame (WMs vary too much for custom title bars)
     // macOS/Windows: hidden title bar with custom drag region
     ...(process.platform === 'linux' ? {} : { titleBarStyle: 'hidden' as const }),
+    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 14 } } : {}),
     ...(process.platform === 'win32' ? {
       titleBarOverlay: {
         color: nativeTheme.shouldUseDarkColors ? '#161616' : '#ffffff',

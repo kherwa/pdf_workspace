@@ -1,6 +1,5 @@
 import React from 'react'
 import useSave from '../../hooks/useSave'
-import { useApp } from '../../context/AppContext'
 
 type Variant = 'primary' | 'compact' | 'icon'
 
@@ -17,7 +16,6 @@ interface Props {
 
 export default function SaveButton({ variant = 'primary', forceSaveAs = false, confirm = false, saveSuffix, tabId, disabled, children, onSaved }: Props) {
   const { canSave, saving, save, saveAs, confirmAndSave } = useSave(tabId)
-  const { activeTab } = useApp()
 
   const isDisabled = disabled || !canSave || saving
 
